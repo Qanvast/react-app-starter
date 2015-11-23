@@ -27,7 +27,7 @@ import GoogleAnalytics from 'react-ga';
 /*=================================
  Routes
  =================================*/
-import routes from './routes.jsx';
+import routes from './Routes.jsx';
 
 /*=================================
  Router
