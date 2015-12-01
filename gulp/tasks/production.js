@@ -2,8 +2,9 @@
 
 // Gulp & plugins
 var gulp = require('gulp');
+var runSequeunce = require('run-sequence');
 
 // Run this to compress all the things!
-gulp.task('production', ['clean'], function () {
-    gulp.start(['assets', 'minifyCss', 'uglifyJs', 'templates', 'images', 'fonts', 'markup']);
+gulp.task('production', function (callback) {
+    runSequeunce('clean', ['assets', 'minifyCss', 'uglifyJs', 'templates', 'images', 'fonts', 'markup'], callback);
 });

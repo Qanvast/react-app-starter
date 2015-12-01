@@ -4,6 +4,9 @@ var dest = "./public";
 var src = "./src";
 var serverDest = "./server";
 
+var testSrc = "./tests";
+var testDest = "./.tests";
+
 var bowerSrc = "./bower_components";
 var nodeSrc = "./node_modules";
 
@@ -38,7 +41,8 @@ module.exports = {
             //indentedSyntax: true, // Enable .sass syntax!
             imagePath: dest + "/img", // Used by the image-url helper
             includePaths: [
-                bowerSrc + "/bootstrap-sass/assets/stylesheets"
+                bowerSrc + "/bootstrap-sass/assets/stylesheets",
+                bowerSrc + "/font-awesome/scss"
             ],
             outputStyle: "expanded"
         }
@@ -112,6 +116,33 @@ module.exports = {
         script: {
             src: dest + "/js/*.js",
             dest: dest + "/js"
+        }
+    },
+    test: {
+        src: [
+            testSrc + "/**/*.js"
+        ],
+        dest: testDest,
+        mochaOptions: {},
+        testOptions: {
+            externals: /^[a-z\-0-9]+$/,
+            output: {
+                filename: 'all.js',
+                libraryTarget: 'commonjs2'
+            },
+            module: {
+                loaders: [
+                    {
+                        test: /\.jsx?$/,
+                        exclude: /node_modules/,
+                        loader: 'babel-loader'
+                    }
+                ]
+            },
+            resolve: {
+                // Tell webpack to look for required files in bower and node
+                modulesDirectories: [bowerSrc, nodeSrc]
+            }
         }
     }
 };

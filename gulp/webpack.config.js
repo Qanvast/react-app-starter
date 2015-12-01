@@ -17,7 +17,10 @@ module.exports = function (src, bowerSrc, nodeSrc) {
                 {
                     test: /\.jsx?$/,
                     exclude: /node_modules/,
-                    loader: 'babel-loader'
+                    loader: 'babel-loader',
+                    query: {
+                        presets: ['react', 'es2015']
+                    }
                 }
             ],
             noParse: /\.min\.js/

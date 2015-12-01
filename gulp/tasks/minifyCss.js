@@ -10,7 +10,7 @@ var config = require('../config').production.css;
 
 gulp.task('minifyCss', ['sass'], function () {
     return gulp.src(config.src)
-        .pipe(minifyCSS({keepBreaks: true}))
+        .pipe(minifyCSS({keepBreaks: true, processImport: false}))
         .pipe(gulp.dest(config.dest))
         .pipe(size());
 });
