@@ -1,8 +1,8 @@
 'use strict';
 
 // React
-import React from 'react/addons';
-import invariant from 'react/lib/invariant';
+import React from 'react';
+import invariant from 'fbjs/lib/invariant';
 
 // Libraries
 import _ from 'lodash';

@@ -5,7 +5,6 @@ import React from 'react';
 
 // Libraries
 import _ from 'lodash';
-import {RouteHandler} from 'react-router';
 
 // Components
 import {Navbar, Nav, NavItem} from 'react-bootstrap';
@@ -40,7 +39,7 @@ class App extends React.Component {
                     </Nav>
                 </Navbar>
                 <main className='container-fluid'>
-                    <RouteHandler {...this.props}/>
+                    {this.props.children}
                 </main>
                 <footer className='container-fluid'>
                     <div className='row'>

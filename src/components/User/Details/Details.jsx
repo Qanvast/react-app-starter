@@ -6,7 +6,7 @@ import React from 'react';
 // Libraries
 import _ from 'lodash';
 import assign from 'object-assign';
-import {Link, RouteHandler} from 'react-router';
+import {Link} from 'react-router';
 
 // Actions
 import AppActions from '../../../actions/AppActions';

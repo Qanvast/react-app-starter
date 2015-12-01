@@ -18,8 +18,8 @@ class User extends Base {
                         // TODO Refactor this out to a DAO layer.
                         http
                             .get('/user/' + id)
-                            .use(super.constants.BASE_URL)
-                            .timeout(super.constants.TIMEOUT_MS)
+                            .use(this.constants.BASE_URL)
+                            .timeout(this.constants.TIMEOUT_MS)
                             .end(callback);
                     },
 
@@ -52,8 +52,8 @@ class User extends Base {
                                 page: page,
                                 'per_page_count': perPageCount
                             })
-                            .use(super.constants.BASE_URL)
-                            .timeout(super.constants.TIMEOUT_MS)
+                            .use(this.constants.BASE_URL)
+                            .timeout(this.constants.TIMEOUT_MS)
                             .end(callback);
                     },
 
@@ -92,8 +92,8 @@ class User extends Base {
                                 email,
                                 name
                             })
-                            .use(super.constants.BASE_URL)
-                            .timeout(super.constants.TIMEOUT_MS)
+                            .use(this.constants.BASE_URL)
+                            .timeout(this.constants.TIMEOUT_MS)
                             .end(callback);
                     },
 
