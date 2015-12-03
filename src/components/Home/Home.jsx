@@ -103,7 +103,7 @@ class Home extends React.Component {
         };
 
         this.loadPage = (page) => {
-            this.props.location.transitionTo('user-list', {page: page});
+            this.context.history.pushState(null, `/${page}`);
         };
     }
 
@@ -202,5 +202,10 @@ class Home extends React.Component {
         };
     }
 }
+
+Home.contextTypes = {
+    history: React.PropTypes.object.isRequired,
+    location: React.PropTypes.object.isRequired
+};
 
 export default Home;

@@ -104,10 +104,10 @@ class Details extends React.Component {
         const panelHeader = (<h3>{this.state.user.name} (ID : {this.state.user.id})</h3>);
         const panelFooter = (
             <ButtonGroup>
-                <Button bsStyle='info' onClick={() => {this.context.location.transitionTo('user-details', {id: parseInt(this.state.user.id) + 1});}}>
+                <Button bsStyle='info' onClick={() => {this.context.history.pushState(null, `/user/${parseInt(this.state.user.id) + 1}`);}}>
                     Next User
                 </Button>
-                <Button bsStyle='warning' onClick={() => { if (!this.context.location.goBack()) {this.context.location.transitionTo('app');}}}>
+                <Button bsStyle='warning' onClick={() => {this.context.history.goBack();}}>
                     Back
                 </Button>
             </ButtonGroup>
@@ -181,6 +181,7 @@ class Details extends React.Component {
 }
 
 Details.contextTypes = {
+    history: React.PropTypes.object.isRequired,
     location: React.PropTypes.object.isRequired
 };
 
