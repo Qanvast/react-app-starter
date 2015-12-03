@@ -61,19 +61,17 @@ class Home extends React.Component {
                 perPageCount: this.state.perPageCount
             };
 
-            if (this.context.router != null) {
-                let params = this.context.router.getCurrentParams();
-
-                if (params.page != null) {
-                    let page = parseInt(params.page);
+            if (this.props.params != null) {
+                if (this.props.params.page != null) {
+                    let page = parseInt(this.props.params.page);
 
                     if (!isNaN(page)) {
                         parameters.page = page;
                     }
                 }
 
-                if (params.per_page_count != null) {
-                    let perPageCount = parseInt(params.per_page_count);
+                if (this.props.params.per_page_count != null) {
+                    let perPageCount = parseInt(this.props.params.per_page_count);
 
                     if (!isNaN(perPageCount)) {
                         parameters.perPageCount = perPageCount;
@@ -105,7 +103,7 @@ class Home extends React.Component {
         };
 
         this.loadPage = (page) => {
-            this.context.router.transitionTo('user-list', {page: page});
+            this.props.location.transitionTo('user-list', {page: page});
         };
     }
 
@@ -204,9 +202,5 @@ class Home extends React.Component {
         };
     }
 }
-
-Home.contextTypes = {
-    router: React.PropTypes.func.isRequired
-};
 
 export default Home;

@@ -13,13 +13,8 @@ class ContextWrapper extends React.Component {
     }
 }
 
-ContextWrapper.contextTypes = {
-    router: React.PropTypes.func.isRequired
-};
+ContextWrapper.contextTypes = {};
 
-
-ContextWrapper.childContextTypes = {
-    router: React.PropTypes.func.isRequired
-};
+ContextWrapper.childContextTypes = {};
 
 export default ContextWrapper;

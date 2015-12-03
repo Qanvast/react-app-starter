@@ -1,8 +1,5 @@
 'use strict';
 
-// Libraries
-//import async from 'async';
-
 // Dispatcher and constants
 import alt from '../alt';
 

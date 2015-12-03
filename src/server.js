@@ -102,13 +102,13 @@ apiRouter.get('/user/:id', (req, res) => {
 app.use('/api', apiRouter);
 
 // React App
-app.use(Router.getData, Router.serve);
+app.use(Router.serve);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-    let err = new Error('Not Found');
-    err.status = 404;
-    next(err);
+    let error = new Error('Not Found');
+    error.status = 404;
+    next(error);
 });
 
 /**

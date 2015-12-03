@@ -4,7 +4,7 @@
  React & Router
  =================================*/
 import React from 'react';
-import {Route, DefaultRoute} from 'react-router';
+import {Route, IndexRoute} from 'react-router';
 
 /*=================================
  Components
@@ -17,10 +17,10 @@ import UserDetails from '../components/User/Details';
  ROUTES
  =================================*/
 let routes = (
-    <Route name="app" path="/" handler={App} >
-        <Route name="user-details" path="/user/:id/?" handler={UserDetails} />
-        <Route name="user-list" path="/:page/?" handler={Home} />
-        <DefaultRoute name="home" handler={Home} />
+    <Route path="/" component={App} >
+        <Route path="/user/:id" component={UserDetails} />
+        <Route path="/:page" component={Home} />
+        <IndexRoute component={Home} />
     </Route>
 );
 

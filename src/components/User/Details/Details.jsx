@@ -63,11 +63,9 @@ class Details extends React.Component {
                 }
             };
 
-            if (this.context.router != null) {
-                let params = this.context.router.getCurrentParams();
-
-                if (params.id != null) {
-                    let userId = parseInt(params.id);
+            if (this.props.params != null) {
+                if (this.props.params.id != null) {
+                    let userId = parseInt(this.props.params.id);
 
                     if (!isNaN(userId)) {
                         parameters.user.id = userId;
@@ -106,10 +104,10 @@ class Details extends React.Component {
         const panelHeader = (<h3>{this.state.user.name} (ID : {this.state.user.id})</h3>);
         const panelFooter = (
             <ButtonGroup>
-                <Button bsStyle='info' onClick={() => {this.context.router.transitionTo('user-details', {id: parseInt(this.state.user.id) + 1});}}>
+                <Button bsStyle='info' onClick={() => {this.context.location.transitionTo('user-details', {id: parseInt(this.state.user.id) + 1});}}>
                     Next User
                 </Button>
-                <Button bsStyle='warning' onClick={() => { if (!this.context.router.goBack()) {this.context.router.transitionTo('app');}}}>
+                <Button bsStyle='warning' onClick={() => { if (!this.context.location.goBack()) {this.context.location.transitionTo('app');}}}>
                     Back
                 </Button>
             </ButtonGroup>
@@ -183,7 +181,7 @@ class Details extends React.Component {
 }
 
 Details.contextTypes = {
-    router: React.PropTypes.func.isRequired
+    location: React.PropTypes.object.isRequired
 };
 
 export default Details;

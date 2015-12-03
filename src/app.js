@@ -22,7 +22,7 @@ if (typeof window !== 'undefined') {
     window.onload = function () {
         GoogleAnalytics.initialize(appConfig.googleAnalytics.appId);
 
-        Iso.bootstrap((state, meta, containerReference) => {
+        Iso.bootstrap((state, meta, node) => {
             alt.bootstrap(state);
 
             Router.init();

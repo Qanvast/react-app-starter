@@ -33,8 +33,13 @@ class App extends React.Component {
     render() {
         return (
             <div>
-                <Navbar brand='React App Starter' staticTop toggleNavKey={0}>
-                    <Nav right eventKey={0}> {/* This is the eventKey referenced */}
+                <Navbar staticTop>
+                    <Navbar.Header>
+                        <Navbar.Brand>
+                            <a href="#">React App Starter</a>
+                        </Navbar.Brand>
+                    </Navbar.Header>
+                    <Nav pullRight>
                       <NavItem eventKey={1} href='http://stevetan.me'>Blog</NavItem>
                     </Nav>
                 </Navbar>
