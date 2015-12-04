@@ -113,7 +113,7 @@ export default class AppRouter {
             if (error) {
                 next(error);
             } else if (redirectLocation) {
-                res.redirect(302, redirectLocation.pathname + redirectLocation.search)
+                res.redirect(302, redirectLocation.pathname + redirectLocation.search);
             } else if (renderProps) {
                 getDataForRoutes(renderProps, (error, metadata) => {
                     if (!error) {
