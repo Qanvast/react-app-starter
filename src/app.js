@@ -20,6 +20,9 @@ import GoogleAnalytics from 'react-ga';
 
 if (typeof window !== 'undefined') {
     window.onload = function () {
+        // Remove the no-javascript warning.
+        window.document.body.removeChild(window.document.getElementById('no-js-warning'));
+
         GoogleAnalytics.initialize(appConfig.googleAnalytics.appId);
 
         Iso.bootstrap((state, meta, node) => {
