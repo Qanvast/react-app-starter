@@ -28,7 +28,7 @@ if (typeof window !== 'undefined') {
         Iso.bootstrap((state, meta, node) => {
             alt.bootstrap(state);
 
-            Router.init();
+            Router.init(node);
         });
     };
 }

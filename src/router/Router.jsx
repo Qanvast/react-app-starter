@@ -78,7 +78,7 @@ export default class AppRouter {
      * Client side router initialization.
      * @param data
      */
-    static init() {
+    static init(container) {
         render(
             <Router
                 history={createHistory()}
@@ -101,7 +101,7 @@ export default class AppRouter {
                     }
                 }
             />,
-            window.document.getElementById("app")
+            container
         );
     }
 
