@@ -21,7 +21,13 @@ import UserStore from '../../../stores/UserStore';
 function getInitialState() {
     return {
         isLoading: true,
-        user: {}
+        user: {
+            name: 'John Doe',
+            address: {
+                line1: '-',
+                line2: '-'
+            }
+        }
     };
 }
 
@@ -85,10 +91,6 @@ class Details extends React.Component {
         UserStore.listen(this.onChange);
     }
 
-    componentWillMount() {
-        this.onChange();
-    }
-
     componentWillUnmount() {
         UserStore.unlisten(this.onChange);
     }
@@ -109,6 +111,9 @@ class Details extends React.Component {
                 </Button>
                 <Button bsStyle='warning' onClick={() => {this.context.history.goBack();}}>
                     Back
+                </Button>
+                <Button bsStyle='danger' onClick={() => {this.context.history.pushState(null, `/`);}}>
+                    Home
                 </Button>
             </ButtonGroup>
         );
