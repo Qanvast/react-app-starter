@@ -79,27 +79,27 @@ export default class AppRouter {
      * @param data
      */
     static init(container) {
+        function onUpdate () {
+            let state = this.state;
+
+            getDataForRoutes(state, (error, metadata) => {
+                if (!error) {
+                    if (_.has(state, 'location.pathname')) {
+                        GoogleAnalytics.pageview(state.location.pathname);
+                    }
+
+                    if (_.has(metadata, 'title')) {
+                        document.title = metadata.title;
+                    }
+                }
+            });
+        }
+
         render(
             <Router
                 history={createHistory()}
                 routes={routes}
-                onUpdate={
-                    function onUpdate () {
-                        let state = this.state;
-
-                        getDataForRoutes(state, (error, metadata) => {
-                            if (!error) {
-                                if (_.has(state, 'location.pathname')) {
-                                    GoogleAnalytics.pageview(state.location.pathname);
-                                }
-
-                                if (_.has(metadata, 'title')) {
-                                    document.title = metadata.title;
-                                }
-                            }
-                        });
-                    }
-                }
+                onUpdate={onUpdate}
             />,
             container
         );
