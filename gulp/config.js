@@ -93,7 +93,9 @@ module.exports = {
     fonts: {
         src: [
             src + "/assets/fonts/**/*.{eot,svg,ttf,woff,woff2}",
-            src + "/components/**/*.{eot,svg,ttf,woff,woff2}"
+            src + "/components/**/*.{eot,svg,ttf,woff,woff2}",
+            bowerSrc + "/bootstrap-sass/assets/fonts/**/*.{eot,svg,ttf,woff,woff2}",
+            bowerSrc + "/font-awesome/fonts/**/*.{eot,svg,ttf,woff,woff2}"
         ],
         dest: dest + "/fonts",
         filter: "**/*.{eot,svg,ttf,woff,woff2}"
