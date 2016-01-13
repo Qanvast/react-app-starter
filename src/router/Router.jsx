@@ -40,32 +40,32 @@ function getDataForRoutes (renderProps, callback) {
     async.waterfall([
         callback => {
             // Loop through the matching routes
-            let routesWithData = renderProps.components.filter((component) => { return component.fetchData; });
-            let routesWithMetadata = renderProps.components.filter((component) => { return component.generateMetadata; });
-            let routeWithMetadata = null;
+            let componentsWithData = renderProps.components.filter((component) => { return component.fetchData; });
+            let componentsWithMetadata = renderProps.components.filter((component) => { return component.generateMetadata; });
+            let componentWithMetadata = null;
 
             // We always take the last one route with meta data.
-            if (routesWithMetadata.length >= 1) {
-                routeWithMetadata = routesWithMetadata[routesWithMetadata.length - 1];
+            if (componentsWithMetadata.length >= 1) {
+                componentWithMetadata = componentsWithMetadata[componentsWithMetadata.length - 1];
             }
 
-            callback(null, routesWithData, routeWithMetadata);
+            callback(null, componentsWithMetadata, componentWithMetadata);
         },
 
-        (routesWithData, routeWithMetadata, callback) => {
-            async.map(routesWithData, (route, fetchDataCallback) => {
+        (componentsWithMetadata, componentWithMetadata, callback) => {
+            async.map(componentsWithMetadata, (route, fetchDataCallback) => {
                 // Fetch data for each route
                 route.fetchData(renderProps, fetchDataCallback);
             }, error => {
-                callback(error, routeWithMetadata);
+                callback(error, componentWithMetadata);
             });
         },
 
-        (routeWithMetadata, callback) => {
+        (componentWithMetadata, callback) => {
             let metadata = _.cloneDeep(appConfig.metadata);
 
-            if (routeWithMetadata != null) {
-                _.merge(metadata, routeWithMetadata.generateMetadata(renderProps));
+            if (componentWithMetadata != null) {
+                _.merge(metadata, componentWithMetadata.generateMetadata(renderProps));
             }
 
             callback(null, metadata);
