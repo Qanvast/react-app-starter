@@ -40,8 +40,8 @@ function getDataForRoutes (renderProps, callback) {
     async.waterfall([
         callback => {
             // Loop through the matching routes
-            let componentsWithData = renderProps.components.filter((component) => { return component.fetchData; });
-            let componentsWithMetadata = renderProps.components.filter((component) => { return component.generateMetadata; });
+            let componentsWithData = renderProps.components.filter((component) => { return component && component.fetchData; });
+            let componentsWithMetadata = renderProps.components.filter((component) => { return component && component.generateMetadata; });
             let componentWithMetadata = null;
 
             // We always take the last one route with meta data.
@@ -49,13 +49,13 @@ function getDataForRoutes (renderProps, callback) {
                 componentWithMetadata = componentsWithMetadata[componentsWithMetadata.length - 1];
             }
 
-            callback(null, componentsWithMetadata, componentWithMetadata);
+            callback(null, componentsWithData, componentWithMetadata);
         },
 
-        (componentsWithMetadata, componentWithMetadata, callback) => {
-            async.map(componentsWithMetadata, (route, fetchDataCallback) => {
-                // Fetch data for each route
-                route.fetchData(renderProps, fetchDataCallback);
+        (componentsWithData, componentWithMetadata, callback) => {
+            async.map(componentsWithData, (component, fetchDataCallback) => {
+                // Fetch data for each component
+                component.fetchData(renderProps, fetchDataCallback);
             }, error => {
                 callback(error, componentWithMetadata);
             });
