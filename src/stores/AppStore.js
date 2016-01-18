@@ -28,7 +28,8 @@ class AppStore {
             this.addPendingAlert({
                 type: 'error',
                 title: 'Oops!',
-                message: data.error.message
+                message: _.has(data, 'error.response.body.message') ? data.error.response.body.message : data.error.message,
+                error: _.has(data, 'error.response.body') ? data.error.response.body : undefined
             });
         }
     }
