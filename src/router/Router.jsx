@@ -84,12 +84,12 @@ export default class AppRouter {
 
             getDataForRoutes(state, (error, metadata) => {
                 if (!error) {
-                    if (_.has(state, 'location.pathname')) {
-                        GoogleAnalytics.pageview(state.location.pathname);
-                    }
-
                     if (_.has(metadata, 'title')) {
                         document.title = metadata.title;
+                    }
+
+                    if (_.has(state, 'location.pathname')) {
+                        GoogleAnalytics.pageview(state.location.pathname);
                     }
                 }
             });
