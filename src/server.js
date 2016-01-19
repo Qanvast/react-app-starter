@@ -10,6 +10,7 @@ let debug = _debug('react-app-starter');
  * Express app dependencies.
  */
 import express, {Router as expressRouter} from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import hbs from 'express-handlebars';
 import path from 'path';
@@ -18,6 +19,11 @@ import logger from 'morgan';
 
 import _ from 'lodash';
 import chance from 'chance';
+
+/**
+ * Configs
+ */
+import cookieConfig from './configs/cookie';
 
 /**
  * Setup server app.
@@ -38,6 +44,7 @@ app.use(favicon(path.join(__dirname, '../public/favicon.ico')));
 app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use(cookieParser(cookieConfig.secret));
 app.use(cors());
 
 let generator = chance();

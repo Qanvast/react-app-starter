@@ -12,6 +12,7 @@ import Iso from 'iso';
  Configs
  =================================*/
 import appConfig from '../configs/app';
+import cookieConfig from '../configs/cookie';
 
 /*=================================
  React & Router
@@ -122,6 +123,19 @@ export default class AppRouter {
                         let data = alt.flush(); // Take a snapshot of the datastores and flush it
 
                         iso.add(htmlBody, data); // Add the data snapshot to the response
+
+                        // Add/Update cookie
+                        console.log("COOKIE: %s", JSON.stringify(req.signedCookies));
+
+                        if (_.isEmpty(req.signedCookies)) {
+                            // Add cookie
+                            console.log(`New session! Initializing cookie with request count 1.`);
+                            res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
+                        } else {
+                            // Update cookie
+                            console.log(`Old cookie with request count ${req.signedCookies.requestCount}.`);
+                            res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
+                        }
 
                         res.render('index', {
                             app: appConfig,
