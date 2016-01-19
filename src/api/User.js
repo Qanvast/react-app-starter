@@ -18,6 +18,7 @@ class User extends Base {
                         // TODO Refactor this out to a DAO layer.
                         http
                             .get('/user/' + id)
+                            .withCredentials()
                             .use(this.constants.BASE_URL)
                             .timeout(this.constants.TIMEOUT_MS)
                             .end(callback);
@@ -48,6 +49,7 @@ class User extends Base {
                     callback => {
                         http
                             .get('/users')
+                            .withCredentials()
                             .query({
                                 page: page,
                                 'per_page_count': perPageCount

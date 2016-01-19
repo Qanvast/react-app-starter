@@ -11,7 +11,7 @@ let debug = _debug('react-app-starter');
  */
 import express, {Router as expressRouter} from 'express';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
+import cors from './utilities/cors';
 import hbs from 'express-handlebars';
 import path from 'path';
 import favicon from 'serve-favicon';
@@ -25,15 +25,18 @@ import chance from 'chance';
  */
 import cookieConfig from './configs/cookie';
 
-/**
- * Setup server app.
- */
+/**========================================
+ * Bootstrapping Express.js App
+ ========================================**/
+var app = express();
 
-let app = express();
-import Router from './router';
+var env = app.get('env').toLowerCase();
 
 // disable `X-Powered-By` HTTP header
 app.disable('x-powered-by');
+
+// Enable proxy
+app.enable('trust proxy');
 
 // view engine setup
 app.engine('hbs', hbs({defaultLayout: 'main', extname: '.hbs'}));
@@ -45,7 +48,12 @@ app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(cookieParser(cookieConfig.secret));
-app.use(cors());
+
+/**========================================
+ * Bootstrapping CORS
+ ========================================**/
+app.options('*', cors(env));
+app.use(cors(env));
 
 let generator = chance();
 const MAX_USERS = 1000;
@@ -65,6 +73,23 @@ for (let i = 0; i <= MAX_USERS; i++) {
 }
 
 let apiRouter = expressRouter();
+
+apiRouter.use((req, res, next) => {
+    // Add/Update cookie
+    console.log(`REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
+
+    if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
+        // Add cookie
+        console.log(`New session! Initializing cookie with request count 1.`);
+        res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
+    } else {
+        // Update cookie
+        console.log(`Old cookie with request count ${req.signedCookies.requestCount}.`);
+        res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
+    }
+
+    next();
+});
 
 apiRouter.get('/users', (req, res) => {
     let perPageCount = (req.query.per_page_count == null || req.query.per_page_count < 1) ? 10 : parseInt(req.query.per_page_count),
@@ -109,6 +134,7 @@ apiRouter.get('/user/:id', (req, res) => {
 app.use('/api', apiRouter);
 
 // React App
+import Router from './router';
 app.use(Router.serve);
 
 // catch 404 and forward to error handler

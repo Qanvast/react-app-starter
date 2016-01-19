@@ -127,7 +127,7 @@ export default class AppRouter {
                         // Add/Update cookie
                         console.log("COOKIE: %s", JSON.stringify(req.signedCookies));
 
-                        if (_.isEmpty(req.signedCookies)) {
+                        if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
                             // Add cookie
                             console.log(`New session! Initializing cookie with request count 1.`);
                             res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
