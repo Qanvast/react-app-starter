@@ -21,5 +21,9 @@ React App Starter
  * `react-ga`
  * `react-router`
  * `superagent`
+ 
+## TODO
+ * Implement proxy API simulation.
+ * Replace alt with redux.
 
 > More Information Soon...
