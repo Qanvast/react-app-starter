@@ -20,7 +20,7 @@ import cookieConfig from '../configs/cookie';
 import React from 'react';
 import {render} from 'react-dom';
 import {renderToString} from 'react-dom/server';
-import {Router, match, RoutingContext} from 'react-router';
+import {Router, match, RouterContext} from 'react-router';
 import {createHistory} from 'history';
 
 /*=================================
@@ -119,7 +119,7 @@ export default class AppRouter {
                 getDataForRoutes(renderProps, (error, metadata) => {
                     if (!error) {
                         let iso = new Iso();
-                        let htmlBody = renderToString(<RoutingContext {...renderProps} />);
+                        let htmlBody = renderToString(<RouterContext {...renderProps} />);
                         let data = alt.flush(); // Take a snapshot of the datastores and flush it
 
                         iso.add(htmlBody, data); // Add the data snapshot to the response
