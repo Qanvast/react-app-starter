@@ -89,7 +89,8 @@ class User extends Base {
                 async.waterfall([
                     function (callback) {
                         http
-                            .get('/register')
+                            .post('/register')
+                            .withCredentials()
                             .query({
                                 email,
                                 name

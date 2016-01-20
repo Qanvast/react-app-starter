@@ -125,15 +125,15 @@ export default class AppRouter {
                         iso.add(htmlBody, data); // Add the data snapshot to the response
 
                         // Add/Update cookie
-                        console.log("COOKIE: %s", JSON.stringify(req.signedCookies));
+                        console.log(`PAGE REQ :: REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
 
                         if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
                             // Add cookie
-                            console.log(`New session! Initializing cookie with request count 1.`);
+                            console.log(`PAGE REQ :: New session! Initializing cookie with request count 1.`);
                             res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
                         } else {
                             // Update cookie
-                            console.log(`Old cookie with request count ${req.signedCookies.requestCount}.`);
+                            console.log(`PAGE REQ :: Old cookie with request count ${req.signedCookies.requestCount}.`);
                             res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
                         }
 

@@ -5,7 +5,7 @@ export default {
     defaultOptions: {
         httpOnly: true,
         maxAge: 1 * 60 * 60 * 1000, // 1 hour
-        secure: true, // Use HTTPS only
+        secure: process.env.NODE_ENV === 'production', // Use HTTPS in production only
         signed: true // Encrypted
     }
 }

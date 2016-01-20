@@ -76,15 +76,15 @@ let apiRouter = expressRouter();
 
 apiRouter.use((req, res, next) => {
     // Add/Update cookie
-    console.log(`REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
+    console.log(`API REQ :: REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
 
     if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
         // Add cookie
-        console.log(`New session! Initializing cookie with request count 1.`);
+        console.log(`API REQ :: New session! Initializing cookie with request count 1.`);
         res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
     } else {
         // Update cookie
-        console.log(`Old cookie with request count ${req.signedCookies.requestCount}.`);
+        console.log(`API REQ :: Old cookie with request count ${req.signedCookies.requestCount}.`);
         res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
     }
 
