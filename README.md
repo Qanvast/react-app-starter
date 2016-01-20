@@ -20,7 +20,7 @@ React App Starter
  * `react-bootstrap`
  * `react-ga`
  * `react-router`
- * `superagent`
+ * `superagent` (To be replaced with either `axios` or `isomorphic-fetch`)
  
 ## TODO
  * Implement proxy API simulation.
