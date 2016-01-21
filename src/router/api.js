@@ -1,6 +1,15 @@
 'use strict';
 
+/**========================================
+ * Packages
+ ========================================**/
+import _ from 'lodash';
 import {Router} from 'express';
+
+/**========================================
+ * Utilities
+ ========================================**/
+import e from '../utilities/e';
 
 let api = Router();
 

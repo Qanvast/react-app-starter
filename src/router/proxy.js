@@ -1,6 +1,15 @@
 'use strict';
+
+/**========================================
+ * Packages
+ ========================================**/
 import _ from 'lodash';
 import {Router} from 'express';
+
+/**========================================
+ * Utilities
+ ========================================**/
+import e from '../utilities/e';
 
 let proxy = Router();
 
@@ -17,7 +26,7 @@ proxy.use((req, res, next) => {
             next(e.throwForbiddenError());
         }
 
-        // TODO Retrieve session from session storage.
+        // TODO Retrieve session from session storage and attach it to `req.session`.
 
         next();
     } else {
@@ -33,6 +42,7 @@ proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset
 });
 
 proxy.use('*', (req, res, next) => {
+    // TODO Retrieve API access tokens from `req.session`.
     res.send(`Received ${req.method} request.`);
 });
 
