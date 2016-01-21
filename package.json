@@ -25,6 +25,7 @@
     "del": "2.2.0",
     "es6-promise": "3.0.2",
     "eslint": "1.10.3",
+    "eslint-config-airbnb": "^3.1.0",
     "eslint-loader": "1.2.0",
     "eslint-plugin-react": "3.15.0",
     "eventemitter3": "1.1.1",
