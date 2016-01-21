@@ -4,12 +4,34 @@
  * Packages
  ========================================**/
 import _ from 'lodash';
+import chance from 'chance';
 import {Router} from 'express';
 
 /**========================================
  * Utilities
  ========================================**/
 import e from '../utilities/e';
+
+
+/**========================================
+ * Generate random users
+ ========================================**/
+let generator = chance();
+const MAX_USERS = 1000;
+let _users = [];
+
+for (let i = 0; i <= MAX_USERS; i++) {
+    _users.push({
+        id: i,
+        name: generator.name(),
+        gender: generator.gender(),
+        birthday: generator.birthday(),
+        address: {
+            line1: generator.address(),
+            line2: generator.city()
+        }
+    });
+}
 
 let api = Router();
 

@@ -18,7 +18,6 @@ import favicon from 'serve-favicon';
 import logger from 'morgan';
 
 import _ from 'lodash';
-import chance from 'chance';
 
 /**
  * Utilities
@@ -59,23 +58,6 @@ app.use(cookieParser(cookieConfig.secret));
  ========================================**/
 app.options('*', cors(env));
 app.use(cors(env));
-
-let generator = chance();
-const MAX_USERS = 1000;
-let _users = [];
-
-for (let i = 0; i <= MAX_USERS; i++) {
-    _users.push({
-        id: i,
-        name: generator.name(),
-        gender: generator.gender(),
-        birthday: generator.birthday(),
-        address: {
-            line1: generator.address(),
-            line2: generator.city()
-        }
-    });
-}
 
 /**========================================
  * Proxy API
