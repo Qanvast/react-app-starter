@@ -3,13 +3,13 @@
 /**
  * Module dependencies.
  */
-import {default as _debug} from 'debug';
+import { default as _debug } from 'debug';
 let debug = _debug('react-app-starter');
 
 /**
  * Express app dependencies.
  */
-import express, {Router as expressRouter} from 'express';
+import express, { Router as expressRouter } from 'express';
 import cookieParser from 'cookie-parser';
 import cors from './utilities/cors';
 import hbs from 'express-handlebars';

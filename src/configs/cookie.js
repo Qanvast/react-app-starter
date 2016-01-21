@@ -1,5 +1,3 @@
-'use strict';
-
 export default {
     secret: 'FFXDUiIWWF5ttQyq8irUhIFRfi94lt',
     defaultOptions: {
@@ -8,4 +6,4 @@ export default {
         secure: process.env.NODE_ENV === 'production', // Use HTTPS in production only
         signed: true // Encrypted
     }
-}
+};
