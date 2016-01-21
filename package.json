@@ -39,7 +39,6 @@
     "gulp-cssnano": "2.1.0",
     "gulp-filesize": "0.0.6",
     "gulp-imagemin": "2.4.0",
-    "gulp-minify-css": "1.2.3",
     "gulp-mocha": "2.2.0",
     "gulp-nodemon": "2.0.6",
     "gulp-notify": "2.2.0",

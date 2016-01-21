@@ -2,7 +2,7 @@
 
 // Gulp & plugins
 var gulp = require('gulp');
-var webpack = require('gulp-webpack');
+var webpack = require('webpack-stream');
 
 // BrowerSync
 var browserSync = require('browser-sync');
