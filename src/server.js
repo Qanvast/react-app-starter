@@ -21,6 +21,11 @@ import _ from 'lodash';
 import chance from 'chance';
 
 /**
+ * Utilities
+ */
+import e from './utilities/e';
+
+/**
  * Configs
  */
 import cookieConfig from './configs/cookie';
@@ -72,69 +77,27 @@ for (let i = 0; i <= MAX_USERS; i++) {
     });
 }
 
-let apiRouter = expressRouter();
+/**========================================
+ * Proxy API
+ ========================================**/
+import proxy from './router/proxy';
 
-apiRouter.use((req, res, next) => {
-    // Add/Update cookie
-    console.log(`API REQ :: REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
+app.use('/proxy', proxy);
 
-    if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
-        // Add cookie
-        console.log(`API REQ :: New session! Initializing cookie with request count 1.`);
-        res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
-    } else {
-        // Update cookie
-        console.log(`API REQ :: Old cookie with request count ${req.signedCookies.requestCount}.`);
-        res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
-    }
+/**========================================
+ * Simulate an API (THIS SHOULD BE REMOVED IN PROD)
+ *
+ * We're packaging a mock API here for convenience.
+ ========================================**/
+import api from './router/api';
 
-    next();
-});
+app.use('/api', api);
 
-apiRouter.get('/users', (req, res) => {
-    let perPageCount = (req.query.per_page_count == null || req.query.per_page_count < 1) ? 10 : parseInt(req.query.per_page_count),
-        page = (req.query.page == null || req.query.page < 0) ? 1 : parseInt(req.query.page),
-        startIndex = (page - 1) * perPageCount,
-        endIndex = startIndex + perPageCount;
-
-    let users = _.slice(_users, startIndex, endIndex);
-
-    users = users.map(user => {
-        /**
-         * TODO: Odd numbered users will contain the whole object, while even numbered users will only contain ID and name.
-         * TODO: Remove this if you're not trying to learn React.
-         */
-        if (user.id % 2 === 1) {
-            return user;
-        } else {
-            return {id: user.id, name: user.name};
-        }
-    });
-
-    let response = {
-        page: page,
-        totalCount: MAX_USERS,
-        perPageCount: perPageCount,
-        data: users
-    };
-
-    res.json(response);
-});
-
-apiRouter.get('/user/:id', (req, res) => {
-    let id = req.params.id;
-
-    if (id == null || _users.length <= id) {
-        res.status(500).send({error: 'Invalid user'});
-    } else {
-        res.json(_users[id]);
-    }
-});
-
-app.use('/api', apiRouter);
-
-// React App
+/**========================================
+ * React app
+ ========================================**/
 import Router from './router';
+
 app.use(Router.serve);
 
 // catch 404 and forward to error handler
