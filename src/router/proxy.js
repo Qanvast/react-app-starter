@@ -4,14 +4,18 @@
  * Packages
  ========================================**/
 import _ from 'lodash';
-import {Router} from 'express';
+import { Router } from 'express';
+import moment from 'moment';
 
 /**========================================
  * Utilities
  ========================================**/
 import e from '../utilities/e';
+import SessionStore from '../utilities/sessionStore';
 
 let proxy = Router();
+
+const sessionStore = new SessionStore();
 
 proxy.use((req, res, next) => {
     if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
@@ -26,11 +30,27 @@ proxy.use((req, res, next) => {
             next(e.throwForbiddenError());
         }
 
-        // TODO Retrieve session from session storage and attach it to `req.session`.
+        sessionStore
+            .getSession(req.signedCookies.sessionId)
+            .then(session => {
+                req.session = session;
 
-        next();
+                // Old CSRF tokens are still valid for 5 mins.
+                if (req.session.csrfToken === csrfToken) {
+                    next();
+                } else if (req.session.oldCsrfToken != null
+                    && req.session.refreshTimestamp != null
+                    && req.session.oldCsrfToken === csrfToken
+                    && moment().subtract(5, 'm').isSameOrBefore(req.session.refreshTimestamp)) {
+                    next();
+                } else {
+                    next(e.throwForbiddenError());
+                }
+            })
+            .catch(error => {
+                next(error);
+            });
     } else {
-        // Reject
         next(e.throwForbiddenError());
     }
 });

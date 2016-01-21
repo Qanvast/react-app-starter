@@ -17,9 +17,11 @@ import e from './e';
 /**========================================
  * Configs
  ========================================**/
+import cookieConfig from '../configs/cookie';
+
 const DEFAULT_OPTIONS = {
     session: {
-        maxAge: 60 * 60 // in seconds
+        maxAge: cookieConfig.defaultOptions.maxAge +  5 * 60 // Cookie's maxage + 5 mins
     },
     redis: {
         host: 'localhost',
@@ -79,7 +81,13 @@ class SessionStore {
                         if (!error) {
                             if (session != null) {
                                 try {
-                                    resolve(JSON.parse(session));
+                                    session = JSON.parse(session);
+
+                                    if (_.isPlainObject(session) && !_.isEmpty(session)) {
+                                        resolve(session);
+                                    } else {
+                                        reject(e.throwServerError('Session is corrupted.'));
+                                    }
                                 } catch (parseError) {
                                     reject(parseError);
                                 }
