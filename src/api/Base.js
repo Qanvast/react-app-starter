@@ -10,7 +10,7 @@ class API {
 }
 
 API.constants = {
-    BASE_URL: prefix('http://localhost:8000/api'),
+    BASE_URL: (typeof window !== 'undefined')  ? prefix('http://localhost:8000/api') : prefix('http://localhost:8000/proxy'),
     TIMEOUT_MS: 500
 };
 
