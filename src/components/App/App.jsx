@@ -7,7 +7,7 @@ import React from 'react';
 import _ from 'lodash';
 
 // Components
-import {Navbar, Nav, NavItem} from 'react-bootstrap';
+import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import GoogleAnalytics from 'react-ga';
 import List from '../Widgets/List';
 

@@ -24,6 +24,10 @@
         "quotes": [2, "single", "avoid-escape"],
         "no-underscore-dangle": 1,
         "no-unused-vars": 1,
+        "spaced-comment": [2, "always", {
+            "exceptions": ["-", "+", "="],
+            "markers": ["=", "!"]           // space here to support sprockets directives
+        }],
 
         // Node.js specific
         "handle-callback-err": [1, "^(err|error)$"],

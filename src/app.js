@@ -1,25 +1,23 @@
-'use strict';
-
 import Router from './router';
 
-/*=================================
- Bootstrapping Libraries
- =================================*/
+/**=================================
+ * Bootstrapping Libraries
+ *=================================*/
 import alt from './alt';
 import Iso from 'iso';
 
-/*=================================
- Configs
- =================================*/
+/**=================================
+ * Configs
+ *=================================*/
 import appConfig from './configs/app';
 
-/*=================================
- Google Analytics
- =================================*/
+/**=================================
+ * Google Analytics
+ *=================================*/
 import GoogleAnalytics from 'react-ga';
 
 if (typeof window !== 'undefined') {
-    window.onload = function () {
+    window.onload = () => {
         // Remove the no-javascript warning.
         window.document.body.removeChild(window.document.getElementById('no-js-warning'));
 

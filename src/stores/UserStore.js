@@ -1,25 +1,25 @@
-'use strict';
-
 // Core
 import alt from '../alt';
-import EventEmitter from 'eventemitter3';
+// import EventEmitter from 'eventemitter3';
 
 // Actions
 import UserActions from '../actions/UserActions';
 
 // Dependent Stores
-import AppStore from './AppStore';
+// import AppStore from './AppStore';
 
 // Libraries
 import _ from 'lodash';
-import assign from 'object-assign';
+// import assign from 'object-assign';
 import objectHasKey from '../utilities/objectHasKey';
 
 class UserStore {
-    constructor () {
+    constructor() {
         this.users = {};
-        this.userListOrder = []; // TODO: If user list is to be filtered, we can have a new order array. e.g. userSortedListOrder or userFilteredListOrder
-        this.userSortedListOrder = [];
+        // TODO If user list is to be filtered, we can have a new order array.
+        // TODO e.g. userSortedListOrder or userFilteredListOrder
+        this.userListOrder = [];
+        // this.userSortedListOrder = [];
 
         this.bindAction(UserActions.getUser, this.onGetUser);
         this.bindAction(UserActions.getUsers, this.onGetUsers);
@@ -32,7 +32,7 @@ class UserStore {
     }
 
     onGetUser(payload) {
-        let {
+        const {
             id,
             fields,
             getData,
@@ -40,7 +40,7 @@ class UserStore {
             onFinish
         } = payload;
 
-        let successCallback = user => {
+        const successCallback = user => {
             if (user != null) {
                 this.set(user);
             }
@@ -52,7 +52,7 @@ class UserStore {
             this.emitChange();
         };
 
-        let errorCallback = error => {
+        const errorCallback = error => {
             if (onError != null && _.isFunction(onError)) {
                 onError(error);
             }
@@ -74,7 +74,7 @@ class UserStore {
     }
 
     onGetUsers(payload) {
-        let {
+        const {
             page,
             perPageCount,
             fields,
@@ -83,7 +83,7 @@ class UserStore {
             onFinish
         } = payload;
 
-        let successCallback = users => {
+        const successCallback = users => {
             if (users != null) {
                 this.setList(users, (page - 1) * perPageCount);
             }
@@ -95,7 +95,7 @@ class UserStore {
             this.emitChange();
         };
 
-        let errorCallback = error => {
+        const errorCallback = error => {
             if (onError != null && _.isFunction(onError)) {
                 onError(error);
             }
@@ -130,12 +130,12 @@ class UserStore {
                 }
 
                 return hasAllRequiredFields;
-            } else {
-                return true;
             }
-        } else {
-            return false;
+
+            return true;
         }
+
+        return false;
     }
 
     hasList(startIndex, count, fields) {
@@ -157,9 +157,9 @@ class UserStore {
             }
 
             return listElementsExists;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     hasPage(page, count, fields) {
@@ -181,18 +181,18 @@ class UserStore {
         }
 
         if (startIndex >= 0 && count > 1) {
-            let endIndex = startIndex + count;
+            const endIndex = startIndex + count;
 
             let userList = _.slice(state.userListOrder, startIndex, endIndex);
 
-            userList = _.map(userList, function (id) {
+            userList = _.map(userList, function iterator (id) {
                 return this.users[id];
             }, state);
 
             return userList;
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     getPage(page, count) {
@@ -201,7 +201,7 @@ class UserStore {
 
     set(user) {
         if (user != null) {
-            let clonedUser = _.cloneDeep(user);
+            const clonedUser = _.cloneDeep(user);
 
             //let currentUserObject = this.users[user.id];
             //
@@ -212,9 +212,9 @@ class UserStore {
             this.users[clonedUser.id] = clonedUser; // TODO We might want to do a merge here? In case the API returns data differently
 
             return true; // User was successfully updated.
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     setList(userList, startIndex) {
@@ -230,9 +230,9 @@ class UserStore {
             }, this);
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     // TODO If we need to manage a separate sorted list

@@ -5,10 +5,10 @@ import React from 'react';
 
 // Libraries
 import _ from 'lodash';
-//import {RouteHandler} from 'react-router';
+//import { RouteHandler } from 'react-router';
 
 // Components
-import {Button, ButtonGroup, Panel} from 'react-bootstrap';
+import { Button, ButtonGroup, Panel } from 'react-bootstrap';
 import List from '../Widgets/List';
 import UserWidget from '../User/Widget';
 

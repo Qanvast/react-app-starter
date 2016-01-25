@@ -32,7 +32,7 @@ const DEFAULT_OPTIONS = {
 };
 
 class SessionStore {
-    constructor (options) {
+    constructor(options) {
         this.options = _.defaults({}, options, DEFAULT_OPTIONS);
         this.client = redis.createClient(this.options.redis);
     };

@@ -1,18 +1,16 @@
-'use strict';
-
 // Core
 import alt from '../alt';
-import EventEmitter from 'eventemitter3';
+// import EventEmitter from 'eventemitter3';
 
 // Actions
 import AppActions from '../actions/AppActions';
 
 // Libraries
 import _ from 'lodash';
-import assign from 'object-assign';
+// import assign from 'object-assign';
 
 class AppStore {
-    constructor () {
+    constructor() {
         this.alerts = [];
 
         this.bindAction(AppActions.showAlert, this.onAddPendingAlert);
@@ -23,7 +21,7 @@ class AppStore {
         });
     }
 
-    onAddPendingAlert (data) {
+    onAddPendingAlert(data) {
         if (data.error != null) {
             this.addPendingAlert({
                 type: 'error',
@@ -34,24 +32,26 @@ class AppStore {
         }
     }
 
-    addPendingAlert (alert) {
+    addPendingAlert(alert) {
         if (_.isObject(alert)
             && (alert.type == null || /^((?:info)|(?:success)|(?:error)|(?:warning))$/i.test(alert.type))
             && alert.message != null && alert.title != null) {
-            if (alert.type == null) {
-                alert.type = 'info';
+            const clonedAlert = _.cloneDeep(alert);
+
+            if (clonedAlert.type == null) {
+                clonedAlert.type = 'info';
             }
 
-            this.alerts.push(alert);
+            this.alerts.push(clonedAlert);
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
-    getPendingAlerts () {
-        let state = this.getState();
+    getPendingAlerts() {
+        const state = this.getState();
 
         return state.alerts.splice(0, state.alerts.length);
     }
