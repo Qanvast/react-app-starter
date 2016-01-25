@@ -16,42 +16,41 @@ import SessionStore from '../utilities/sessionStore';
 let proxy = Router();
 
 const sessionStore = new SessionStore();
+const ignoredMethods = ['GET', 'HEAD', 'OPTIONS'];
 
 proxy.use((req, res, next) => {
-    if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
-        // Retrieve session based on session ID and then get the CSRF token.
-        let csrfToken = req.get('x-csrf-token');
+    if (_.indexOf(ignoredMethods, _.upperCase(req.method)) < 0) {
+        if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
+            // Retrieve session based on session ID and then get the CSRF token.
+            let csrfToken = req.get('x-csrf-token');
 
-        if (_.isEmpty(csrfToken)) {
-            csrfToken = req.get('x-xsrf-token');
-        }
+            if (_.isEmpty(csrfToken)) {
+                csrfToken = req.get('x-xsrf-token');
+            }
 
-        if (_.isEmpty(csrfToken)) {
+            if (_.isEmpty(csrfToken)) {
+                next(e.throwForbiddenError());
+            }
+
+            sessionStore
+                .getSession(req.signedCookies.sessionId)
+                .then(session => {
+                    req.session = session;
+
+                    if (req.session.verifyCsrfToken(csrfToken)) {
+                        next();
+                    } else {
+                        next(e.throwForbiddenError());
+                    }
+                })
+                .catch(error => {
+                    next(error);
+                });
+        } else {
             next(e.throwForbiddenError());
         }
-
-        sessionStore
-            .getSession(req.signedCookies.sessionId)
-            .then(session => {
-                req.session = session;
-
-                // Old CSRF tokens are still valid for 5 mins.
-                if (req.session.csrfToken === csrfToken) {
-                    next();
-                } else if (req.session.oldCsrfToken != null
-                    && req.session.refreshTimestamp != null
-                    && req.session.oldCsrfToken === csrfToken
-                    && moment().subtract(5, 'm').isSameOrBefore(req.session.refreshTimestamp)) {
-                    next();
-                } else {
-                    next(e.throwForbiddenError());
-                }
-            })
-            .catch(error => {
-                next(error);
-            });
     } else {
-        next(e.throwForbiddenError());
+        next(); // Ignored method.
     }
 });
 

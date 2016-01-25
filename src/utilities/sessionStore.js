@@ -4,7 +4,8 @@
  * Packages
  ========================================**/
 import _ from 'lodash';
-import keyMirror from 'fbjs/lib/keyMirror'
+import keyMirror from 'fbjs/lib/keyMirror';
+import moment from 'moment';
 import redis from 'redis';
 import uuid from 'uuid';
 import validator from 'validator';
@@ -29,8 +30,74 @@ const DEFAULT_OPTIONS = {
     }
 };
 
-function generateSessionKey (id) {
-    return `session:${id}`;
+class Session {
+    constructor (state) {
+        if (_.isPlainObject && !_.isEmpty(state)) {
+            this._state = _.cloneDeep(state);
+        } else if (_.isString(state)) {
+            try {
+                this._state = JSON.parse(state);
+            } catch (error) {
+                throw e.throwServerError('Session is corrupted.');
+            }
+
+            if (!_.isPlainObject(this._state) || _.isEmpty(this._state)) {
+                throw e.throwServerError('Session is corrupted.');
+            }
+        }
+
+        if (state.id != null && validator.isUUID(state.id, '4')) {
+            this._id = id;
+        } else {
+            this._id = uuid.v4();
+        }
+
+        delete this._state.id; // We don't need another ID copy.
+    }
+
+    static generateKey (id) {
+        return `session:${id}`;
+    }
+
+    get key () {
+        return Session.generateKey(this._id);
+    }
+
+    verifyCsrfToken (csrfToken) {
+        // Old CSRF tokens are still valid for 5 mins.
+        return false;
+
+        //return (
+        //    this._state.oldCsrfToken != null
+        //    && this._state.refreshTimestamp != null
+        //    && this._state.oldCsrfToken === csrfToken
+        //    && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp)
+        //);
+    }
+
+    get id () {
+        return this._id;
+    }
+
+    set id (id) {
+        throw e.throwServerError('Session ID is immutable.');
+    }
+
+    get state () {
+        return _.cloneDeep(this._state);
+    }
+
+    set state (state) {
+        this._state = _.cloneDeep(state);
+    }
+
+    toString() {
+        var snapshot =  _.cloneDeep(this._state);
+
+        snapshot.id = this._id;
+
+        return snapshot.toString();
+    }
 }
 
 class SessionStore {
@@ -41,17 +108,15 @@ class SessionStore {
 
     createSession (state) {
         if (_.isPlainObject(state) && !_.isEmpty(state)) {
-            let newSessionId = uuid.v4();
-
-            state.id = newSessionId;
+            let session = new Session(state);
 
             return new Promise((resolve, reject) => {
                 this
                     .client
-                    .set(generateSessionKey(newSessionId), JSON.stringify(state), 'NX', 'EX', this.options.session.maxAge, (error, response) => {
+                    .set(session.key, session.toString(), 'NX', 'EX', this.options.session.maxAge, (error, response) => {
                         if (!error) {
                             if (response === 'OK') {
-                                resolve(state);
+                                resolve(session);
                             } else {
                                 reject(e.throwServerError('Session already exists.'));
                             }
@@ -77,19 +142,15 @@ class SessionStore {
             return new Promise((resolve, reject) => {
                 this
                     .client
-                    .get(generateSessionKey(id), (error, session) => {
+                    .get(Session.generateKey(id), (error, sessionState) => {
                         if (!error) {
-                            if (session != null) {
+                            if (sessionState != null) {
                                 try {
-                                    session = JSON.parse(session);
+                                    let session = new Session(sessionState);
 
-                                    if (_.isPlainObject(session) && !_.isEmpty(session)) {
-                                        resolve(session);
-                                    } else {
-                                        reject(e.throwServerError('Session is corrupted.'));
-                                    }
-                                } catch (parseError) {
-                                    reject(parseError);
+                                    resolve(session);
+                                } catch (error) {
+                                    reject(error);
                                 }
                             } else {
                                 reject(e.throwServerError('Invalid session ID.'));
@@ -108,15 +169,15 @@ class SessionStore {
     /**
      * Replaces session state in store for session specified.
      *
-     * @param state New session state to merge with existing session
+     * @param session New session state
      * @param id Session ID
      */
-    updateSession (id, state) {
-        if (_.isPlainObject(state) && validator.isUUID(id, '4')) {
+    updateSession (session) {
+        if (session instanceof Session && validator.isUUID(id, '4')) {
             return new Promise((resolve, reject) => {
                 this
                     .client
-                    .set(generateSessionKey(id), JSON.stringify(state), 'XX', 'EX', this.options.session.maxAge, (error, response) => {
+                    .set(Session.generateKey(id), session.toString(), 'XX', 'EX', this.options.session.maxAge, (error, response) => {
                         if (!error) {
                             if (response === 'OK') {
                                 resolve(true);
