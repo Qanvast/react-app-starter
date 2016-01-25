@@ -84,7 +84,7 @@ class SessionStore {
                                     reject(error);
                                 }
                             } else {
-                                reject(e.throwServerError('Invalid session ID.'));
+                                resolve(false);
                             }
 
                         } else {
@@ -100,8 +100,7 @@ class SessionStore {
     /**
      * Replaces session state in store for session specified.
      *
-     * @param session New session state
-     * @param id Session ID
+     * @param session New session to replace current session
      */
     updateSession (session) {
         if (session instanceof Session) {
