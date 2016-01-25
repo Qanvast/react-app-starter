@@ -26,7 +26,7 @@ export default (env) => {
 
     options.origin = (origin, callback) => {
         if (origin == null) {
-            return callback(null, (false || env === 'development'));
+            return callback(null, (env === 'development'));
         }
 
         let originIsWhitelisted = false;

@@ -145,7 +145,7 @@ class Details extends React.Component {
      * Static method to trigger data actions for server-side rendering.
      *
      * @param routerState
-     * @returns {*}
+     * @param callback
      */
     static fetchData(routerState, callback) {
         let state = getInitialState();

@@ -77,7 +77,7 @@ function getDataForRoutes (renderProps, callback) {
 export default class AppRouter {
     /**
      * Client side router initialization.
-     * @param data
+     * @param container
      */
     static init(container) {
         function onUpdate () {

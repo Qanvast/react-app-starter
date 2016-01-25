@@ -12,7 +12,7 @@ import Base from './Base';
 class User extends Base {
     static get(id) {
         return () => {
-            let promise = new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 async.waterfall([
                     callback => {
                         // TODO Refactor this out to a DAO layer.
@@ -37,14 +37,12 @@ class User extends Base {
                     }
                 });
             });
-
-            return promise;
         };
     }
 
     static getPage(page, perPageCount) {
         return () => {
-            let promise = new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 async.waterfall([
                     callback => {
                         http
@@ -78,14 +76,12 @@ class User extends Base {
                     }
                 });
             });
-
-            return promise;
         };
     }
 
     static register(email, name) {
         return () => {
-            let promise = new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 async.waterfall([
                     function (callback) {
                         http
@@ -113,8 +109,6 @@ class User extends Base {
                     }
                 });
             });
-
-            return promise;
         };
     }
 }

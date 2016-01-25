@@ -62,7 +62,7 @@ class Session {
         return this._id;
     }
 
-    set id (id) {
+    static set id (id) {
         throw e.throwServerError('Session ID is immutable.');
     }
 
@@ -82,3 +82,5 @@ class Session {
         return snapshot.toString();
     }
 }
+
+export default Session;
