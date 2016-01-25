@@ -35,6 +35,7 @@ for (let i = 0; i <= MAX_USERS; i++) {
 let api = Router();
 
 api.get('/users', (req, res) => {
+    console.log('origin is ', req.get('origin'));
     let perPageCount = (req.query.per_page_count == null || req.query.per_page_count < 1) ? 10 : parseInt(req.query.per_page_count),
         page = (req.query.page == null || req.query.page < 0) ? 1 : parseInt(req.query.page),
         startIndex = (page - 1) * perPageCount,
@@ -73,5 +74,19 @@ api.get('/user/:id', (req, res) => {
         res.json(_users[id]);
     }
 });
+
+api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i, (req, res, next) => {
+    if (req.body.email && req.body.password) {
+        res.json({
+            accessToken: 'ASDkjnJKSnkjslflkjbjBKBASJBDLS@#!123123',
+            email: req.body.email,
+            password: req.body.password
+        });
+    } else {
+        res.status(500).send({error: 'Wrong email and password'})
+    }
+
+});
+
 
 export default api;

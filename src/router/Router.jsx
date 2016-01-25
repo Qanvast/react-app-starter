@@ -20,8 +20,8 @@ import cookieConfig from '../configs/cookie';
 import React from 'react';
 import {render} from 'react-dom';
 import {renderToString} from 'react-dom/server';
-import {Router, match, RouterContext} from 'react-router';
-import {createHistory} from 'history';
+import {Router, match, RouterContext, useRouterHistory} from 'react-router';
+import {createHashHistory} from 'history';
 
 /*=================================
  Google Analytics
@@ -95,10 +95,10 @@ export default class AppRouter {
                 }
             });
         }
-
+        const appHistory = useRouterHistory(createHashHistory)({ queryKey: false })
         render(
             <Router
-                history={createHistory()}
+                history={appHistory}
                 routes={routes}
                 onUpdate={onUpdate}
             />,
@@ -124,18 +124,62 @@ export default class AppRouter {
 
                         iso.add(htmlBody, data); // Add the data snapshot to the response
 
-                        // Add/Update cookie
-                        console.log(`PAGE REQ :: REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
+                        //if (req.method == 'GET') {
+                        //    // Add/Update cookie
+                        //    let csrfToken = uuid.v4(); // TODO: use generation of csrf token
+                        //
+                        //    if (_.isEmpty(req.signedCookies) && _.isEmpty(req.signedCookies.sessionId)) {
+                        //        // No cookie, so add cookie & new session token
+                        //        sessionStore.createSession({
+                        //            csrfToken: csrfToken
+                        //        }).then(session => {
+                        //            res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                        //            res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+                        //            next();
+                        //        });
+                        //    } else {
+                        //        // Has cookie, retrieve session & Update session
+                        //        sessionStore.getSession(req.signedCookies.sessionId)
+                        //            .then(existingSession => {
+                        //                // existing session, so update it
+                        //                existingSession.state = {
+                        //                    csrfToken: csrfToken
+                        //                };
+                        //                sessionStore.updateSession(existingSession)
+                        //                    .then(session => {
+                        //                        res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                        //                        res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+                        //                        next();
+                        //                    });
+                        //            })
+                        //            .catch(error => {
+                        //                // no existing session, so create new one
+                        //                sessionStore.createSession({
+                        //                    csrfToken: csrfToken
+                        //                }).then(session => {
+                        //                    res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                        //                    res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+                        //                    next();
+                        //                });
+                        //            });
+                        //
+                        //    }
+                        //
+                        //}
 
-                        if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
-                            // Add cookie
-                            console.log(`PAGE REQ :: New session! Initializing cookie with request count 1.`);
-                            res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
-                        } else {
-                            // Update cookie
-                            console.log(`PAGE REQ :: Old cookie with request count ${req.signedCookies.requestCount}.`);
-                            res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
-                        }
+
+                        //// Add/Update cookie
+                        //console.log(`PAGE REQ :: REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
+                        //
+                        //if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
+                        //    // Add cookie
+                        //    console.log(`PAGE REQ :: New session! Initializing cookie with request count 1.`);
+                        //    res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
+                        //} else {
+                        //    // Update cookie
+                        //    console.log(`PAGE REQ :: Old cookie with request count ${req.signedCookies.requestCount}.`);
+                        //    res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
+                        //}
 
                         res.render('index', {
                             app: appConfig,
