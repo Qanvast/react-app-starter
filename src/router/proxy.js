@@ -19,7 +19,7 @@ const sessionStore = new SessionStore();
 const ignoredMethods = ['GET', 'HEAD', 'OPTIONS'];
 
 proxy.use((req, res, next) => {
-    if (_.indexOf(ignoredMethods, _.upperCase(req.method)) < 0) {
+    if (_.indexOf(ignoredMethods, req.method.toUpperCase()) < 0) {
         if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
             // Retrieve session based on session ID and then get the CSRF token.
             let csrfToken = req.get('x-csrf-token');
