@@ -1,5 +1,3 @@
-'use strict';
-
 // Dispatcher and constants
 import alt from '../alt';
 

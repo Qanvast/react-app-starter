@@ -14,7 +14,7 @@ import validator from 'validator';
 import e from '../e';
 
 class Session {
-    constructor (state) {
+    constructor(state) {
         if (_.isPlainObject && !_.isEmpty(state)) {
             this._state = _.cloneDeep(state);
         } else if (_.isString(state)) {

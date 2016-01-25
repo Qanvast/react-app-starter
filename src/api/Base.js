@@ -1,10 +1,8 @@
-'use strict';
-
 // Libraries
 import prefix from 'superagent-prefix';
 
 class API {
-    constructor () {
+    constructor() {
 
     }
 }

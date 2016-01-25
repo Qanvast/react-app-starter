@@ -6,14 +6,14 @@ import React from 'react';
 // Libraries
 import _ from 'lodash';
 import assign from 'object-assign';
-import {Link} from 'react-router';
+import { Link } from 'react-router';
 
 // Actions
 import AppActions from '../../../actions/AppActions';
 import UserActions from '../../../actions/UserActions';
 
 // Components
-import {Button, ButtonGroup, Panel} from 'react-bootstrap';
+import { Button, ButtonGroup, Panel } from 'react-bootstrap';
 
 // Stores
 import UserStore from '../../../stores/UserStore';

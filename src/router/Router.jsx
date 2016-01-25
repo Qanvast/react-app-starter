@@ -18,10 +18,10 @@ import cookieConfig from '../configs/cookie';
  React & Router
  =================================*/
 import React from 'react';
-import {render} from 'react-dom';
-import {renderToString} from 'react-dom/server';
+import { render } from 'react-dom';
+import { renderToString } from 'react-dom/server';
 import {Router, match, RouterContext} from 'react-router';
-import {createHistory} from 'history';
+import { createHistory } from 'history';
 
 /*=================================
  Google Analytics

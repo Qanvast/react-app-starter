@@ -1,15 +1,13 @@
-'use strict';
-
 import _ from 'lodash';
 
 export default (obj, key) => {
     if (_.isString(key)) {
         return (obj[key] != null);
     } else if (_.isArray(key)) {
-        let subObj = obj,
-            hasAllRequiredKeys = true;
+        let subObj = obj;
+        let hasAllRequiredKeys = true;
 
-        for (let subKey of key) {
+        for (const subKey of key) {
             subObj = subObj[subKey];
 
             if (subObj == null) {
@@ -19,7 +17,7 @@ export default (obj, key) => {
         }
 
         return hasAllRequiredKeys;
-    } else {
-        return false;
     }
+
+    return false;
 };
