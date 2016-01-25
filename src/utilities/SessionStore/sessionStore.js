@@ -5,20 +5,21 @@
  ========================================**/
 import _ from 'lodash';
 import keyMirror from 'fbjs/lib/keyMirror';
-import moment from 'moment';
 import redis from 'redis';
 import uuid from 'uuid';
 import validator from 'validator';
 
+import Session from './Session';
+
 /**========================================
  * Utilities
  ========================================**/
-import e from './e';
+import e from '../e';
 
 /**========================================
  * Configs
  ========================================**/
-import cookieConfig from '../configs/cookie';
+import cookieConfig from '../../configs/cookie';
 
 const DEFAULT_OPTIONS = {
     session: {
@@ -29,76 +30,6 @@ const DEFAULT_OPTIONS = {
         port: 6379
     }
 };
-
-class Session {
-    constructor (state) {
-        if (_.isPlainObject && !_.isEmpty(state)) {
-            this._state = _.cloneDeep(state);
-        } else if (_.isString(state)) {
-            try {
-                this._state = JSON.parse(state);
-            } catch (error) {
-                throw e.throwServerError('Session is corrupted.');
-            }
-
-            if (!_.isPlainObject(this._state) || _.isEmpty(this._state)) {
-                throw e.throwServerError('Session is corrupted.');
-            }
-        }
-
-        if (state.id != null && validator.isUUID(state.id, '4')) {
-            this._id = id;
-        } else {
-            this._id = uuid.v4();
-        }
-
-        delete this._state.id; // We don't need another ID copy.
-    }
-
-    static generateKey (id) {
-        return `session:${id}`;
-    }
-
-    get key () {
-        return Session.generateKey(this._id);
-    }
-
-    verifyCsrfToken (csrfToken) {
-        // Old CSRF tokens are still valid for 5 mins.
-        return false;
-
-        //return (
-        //    this._state.oldCsrfToken != null
-        //    && this._state.refreshTimestamp != null
-        //    && this._state.oldCsrfToken === csrfToken
-        //    && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp)
-        //);
-    }
-
-    get id () {
-        return this._id;
-    }
-
-    set id (id) {
-        throw e.throwServerError('Session ID is immutable.');
-    }
-
-    get state () {
-        return _.cloneDeep(this._state);
-    }
-
-    set state (state) {
-        this._state = _.cloneDeep(state);
-    }
-
-    toString() {
-        var snapshot =  _.cloneDeep(this._state);
-
-        snapshot.id = this._id;
-
-        return snapshot.toString();
-    }
-}
 
 class SessionStore {
     constructor (options) {
@@ -173,11 +104,11 @@ class SessionStore {
      * @param id Session ID
      */
     updateSession (session) {
-        if (session instanceof Session && validator.isUUID(id, '4')) {
+        if (session instanceof Session) {
             return new Promise((resolve, reject) => {
                 this
                     .client
-                    .set(Session.generateKey(id), session.toString(), 'XX', 'EX', this.options.session.maxAge, (error, response) => {
+                    .set(Session.generateKey(session.id), session.toString(), 'XX', 'EX', this.options.session.maxAge, (error, response) => {
                         if (!error) {
                             if (response === 'OK') {
                                 resolve(true);
