@@ -7,19 +7,27 @@ import _ from 'lodash';
 import { Router } from 'express';
 import moment from 'moment';
 import http from 'superagent';
+import url from 'url';
+import axios from 'axios';
 
 /**========================================
  * Utilities
  ========================================**/
 import e from '../utilities/e';
 import SessionStore from '../utilities/SessionStore';
-import BaseAPI  from '../api/Base';
 import cookieConfig from '../configs/cookie';
 
 let proxy = Router();
 
 const sessionStore = new SessionStore();
 const ignoredMethods = ['GET', 'HEAD', 'OPTIONS'];
+
+
+var axiosInstance = axios.create({
+    baseURL: 'http://localhost:8000/api',
+    timeout: 1000
+});
+
 
 proxy.use((req, res, next) => {
     if (_.indexOf(ignoredMethods, req.method.toUpperCase()) < 0) {
@@ -70,36 +78,57 @@ proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset
      * 7.) Return response with Cookie
      * 8.) Return error response with cookie
      */
-    let url = BaseAPI.constants.BASE_URL + req.url;
-    console.log('calling ', url, " from proxy.post authenticate");
-    http
-        .post(url)
-        .send(req.body)
-        .set('application/json')
-        .end(function(err, res){
-            if (err) {
-                return res.status(500).send(err);
-            }
-            if (res.accessToken) {
+
+    let reqUrl = req.params[0];
+    let reqQuery = req.query ? req.query : {};
+    let reqBody = req.body ? req.body : {};
+
+    const successResponse = (response) => {
+        console.log('calling /api success: ', response);
+        if (response.statusText == 'OK' && response.data) {
+            if (response.data.accessToken) {
+
+                // if has access token, create new session with new csrf token and store the access token as well
                 sessionStore.createSession({
                     csrfToken: 'asdsadsadas12321ewdas',
-                    accessToken: res.accessToken
+                    accessToken: response.data.accessToken
                 }).then(session => {
-
                     res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
                     res.cookies('csrfToken', session.csrfToken, _.defaults({}, cookieConfig.defaultOptions));
                     res.json({
                         accessToken: session.accessToken
                     });
-
                 }).catch(error => {
                     res.status(500).send(error);
                 });
+
             }
-        });
+        } else {
+            res.status(response.status).send({error: response.statusText});
+        }
+    };
 
+    const errorResponse = (error) => {
+        if (error instanceof Error) {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error);
+            res.status(500).send({error: error.message});
+        } else {
+            // The request was made, but the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log('Out of 2xx range', error);
+            res.status(error.status).send({error: error.data});
+        }
+    };
 
-    res.send('Received connect request.');
+    axiosInstance.request({
+        method: req.method,
+        url: reqUrl,
+        withCredentials: true,
+        params: reqQuery,
+        data: reqBody
+    }).then(successResponse).catch(errorResponse);
+
 });
 
 proxy.use('*', (req, res, next) => {
@@ -117,20 +146,46 @@ proxy.use('*', (req, res, next) => {
      *
      */
 
-
-    console.log('proxy.use* is used');
-    //http
-    //    .get(req.params['0'])
-    //    .withCredentials()
-    //    .query(req.query)
-    //    .use(BaseAPI.constants.BASE_URL)
-    //    .timeout(BaseAPI.constants.TIMEOUT_MS)
-    //    .end((err, response) => {
-    //        //console.log('response from api', req.url, ' is ', response);
-    //        res.json('response from ', BaseAPI.constants.BASE_URL, response);
+    //passRequestToAPI(req)
+    //    .then(responseBody => {
+    //        console.log('response.body from superagent', responseBody);
+    //        res.json(responseBody)
+    //    })
+    //    .catch(error => {
+    //        console.log('error response from superagent', error);
+    //        res.status(error.status).send(error.response);
     //    });
 
-    res.send(`Received ${req.method} request.`);
+    // TODO: move this into a singleton class?
+    let reqUrl = req.params[0];
+    let reqQuery = req.query ? req.query : {};
+    let reqBody = req.body ? req.body : {};
+
+    axiosInstance.request({
+        method: req.method,
+        url: reqUrl,
+        withCredentials: true,
+        params: reqQuery,
+        data: reqBody
+    }).then(function(response) {
+        if (response.statusText == 'OK' && response.data) {
+            res.json(response.data);
+        } else {
+            res.status(response.status).send({error: response.statusText});
+        }
+    }).catch(function (response) {
+        if (response instanceof Error) {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', response);
+            res.status(500).send({error: response.message});
+        } else {
+            // The request was made, but the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log('Out of 2xx range', response);
+            res.status(response.status).send({error: response.data});
+        }
+    });
+
 });
 
 export default proxy;
