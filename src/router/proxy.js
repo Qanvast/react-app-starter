@@ -8,7 +8,6 @@ import { Router } from 'express';
 import moment from 'moment';
 import http from 'superagent';
 import url from 'url';
-import axios from 'axios';
 
 /**========================================
  * Utilities
