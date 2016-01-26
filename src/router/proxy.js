@@ -16,17 +16,12 @@ import axios from 'axios';
 import e from '../utilities/e';
 import SessionStore from '../utilities/SessionStore';
 import cookieConfig from '../configs/cookie';
+import GenericAPI from '../api/Generic';
 
 let proxy = Router();
 
 const sessionStore = new SessionStore();
 const ignoredMethods = ['GET', 'HEAD', 'OPTIONS'];
-
-
-var axiosInstance = axios.create({
-    baseURL: 'http://localhost:8000/api',
-    timeout: 1000
-});
 
 
 proxy.use((req, res, next) => {
@@ -79,55 +74,21 @@ proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset
      * 8.) Return error response with cookie
      */
 
-    let reqUrl = req.params[0];
-    let reqQuery = req.query ? req.query : {};
-    let reqBody = req.body ? req.body : {};
-
-    const successResponse = (response) => {
-        console.log('calling /api success: ', response);
-        if (response.statusText == 'OK' && response.data) {
-            if (response.data.accessToken) {
-
-                // if has access token, create new session with new csrf token and store the access token as well
-                sessionStore.createSession({
-                    csrfToken: 'asdsadsadas12321ewdas',
-                    accessToken: response.data.accessToken
-                }).then(session => {
-                    res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-                    res.cookies('csrfToken', session.csrfToken, _.defaults({}, cookieConfig.defaultOptions));
-                    res.json({
-                        accessToken: session.accessToken
-                    });
-                }).catch(error => {
-                    res.status(500).send(error);
-                });
-
-            }
-        } else {
-            res.status(response.status).send({error: response.statusText});
-        }
-    };
-
-    const errorResponse = (error) => {
-        if (error instanceof Error) {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', error);
+    GenericAPI.sendRequestToApi(req, (err, response) => {
+        if (err || !response.data.accessToken) { return res.status(500).send({error: "Server error"}); }
+        sessionStore.createSession({
+            csrfToken: 'asdsadsadas12321ewdas',
+            accessToken: response.data.accessToken
+        }).then(session => {
+            res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+            res.cookies('csrfToken', session.csrfToken, _.defaults({}, cookieConfig.defaultOptions));
+            res.json({
+                accessToken: session.accessToken
+            });
+        }).catch(error => {
             res.status(500).send({error: error.message});
-        } else {
-            // The request was made, but the server responded with a status code
-            // that falls out of the range of 2xx
-            console.log('Out of 2xx range', error);
-            res.status(error.status).send({error: error.data});
-        }
-    };
-
-    axiosInstance.request({
-        method: req.method,
-        url: reqUrl,
-        withCredentials: true,
-        params: reqQuery,
-        data: reqBody
-    }).then(successResponse).catch(errorResponse);
+        });
+    });
 
 });
 
@@ -143,48 +104,27 @@ proxy.use('*', (req, res, next) => {
      * 7.) if Refresh successful: go to 8; else 9
      * 8.) replace stored tokens with refreshed tokens n go to 3
      * 9.) return error response with cookie
-     *
      */
-
-    //passRequestToAPI(req)
-    //    .then(responseBody => {
-    //        console.log('response.body from superagent', responseBody);
-    //        res.json(responseBody)
-    //    })
-    //    .catch(error => {
-    //        console.log('error response from superagent', error);
-    //        res.status(error.status).send(error.response);
-    //    });
-
-    // TODO: move this into a singleton class?
-    let reqUrl = req.params[0];
-    let reqQuery = req.query ? req.query : {};
-    let reqBody = req.body ? req.body : {};
-
-    axiosInstance.request({
-        method: req.method,
-        url: reqUrl,
-        withCredentials: true,
-        params: reqQuery,
-        data: reqBody
-    }).then(function(response) {
-        if (response.statusText == 'OK' && response.data) {
-            res.json(response.data);
-        } else {
-            res.status(response.status).send({error: response.statusText});
-        }
-    }).catch(function (response) {
-        if (response instanceof Error) {
-            // Something happened in setting up the request that triggered an Error
-            console.log('Error', response);
-            res.status(500).send({error: response.message});
-        } else {
-            // The request was made, but the server responded with a status code
-            // that falls out of the range of 2xx
-            console.log('Out of 2xx range', response);
-            res.status(response.status).send({error: response.data});
-        }
-    });
+    // TODO: complete check valid token algorithm (Step 2)
+    let isAccessTokenValid = (token) => {
+        return true;
+    };
+    // TODO: complete refreshing the expired/invalid token (Step 8)
+    let refreshAccessToken = (oldtoken) => {
+        let refreshedToken = "asdasd";
+        return refreshedToken;
+    };
+    var reqBody = req.body ? req.body : {};
+    if (  !reqBody.accessToken || (reqBody.accessToken && !isAccessTokenValid(reqBody.accessToken))  ) {
+        // if no access token, or has invalid token
+        return res.status(500).send({error: "Missing access token in request body"});
+    } else {
+        // API Token is Valid
+        GenericAPI.sendRequestToApi(req, function(err, response){
+            if (err && !response) { return res.status(500).send({error: err.message}); }
+            return res.json(response);
+        });
+    }
 
 });
 
