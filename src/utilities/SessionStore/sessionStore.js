@@ -77,8 +77,8 @@ class SessionStore {
                         if (!error) {
                             if (sessionState != null) {
                                 try {
+                                    console.log('sessionState', sessionState);
                                     let session = new Session(sessionState);
-
                                     resolve(session);
                                 } catch (error) {
                                     reject(error);
@@ -109,6 +109,7 @@ class SessionStore {
                     .client
                     .set(Session.generateKey(session.id), session.toString(), 'XX', 'EX', this.options.session.maxAge, (error, response) => {
                         if (!error) {
+                            console.log('updateSession.response', response);
                             if (response === 'OK') {
                                 resolve(true);
                             } else {

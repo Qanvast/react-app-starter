@@ -29,8 +29,8 @@ class Session {
             }
         }
 
-        if (state.id != null && validator.isUUID(state.id, '4')) {
-            this._id = id;
+        if (this._state.id != null && validator.isUUID(this._state.id, '4')) {
+            this._id = this._state.id;
         } else {
             this._id = uuid.v4();
         }
@@ -79,7 +79,7 @@ class Session {
 
         snapshot.id = this._id;
 
-        return snapshot.toString();
+        return JSON.stringify(snapshot);
     }
 }
 
