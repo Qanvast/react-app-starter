@@ -74,19 +74,20 @@ proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset
      */
 
     GenericAPI.sendRequestToApi(req, (err, response) => {
-        if (err || !response.data.accessToken) { return res.status(500).send({error: "Server error"}); }
-        sessionStore.createSession({
-            csrfToken: 'asdsadsadas12321ewdas',
-            accessToken: response.data.accessToken
-        }).then(session => {
-            res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-            res.cookies('csrfToken', session.csrfToken, _.defaults({}, cookieConfig.defaultOptions));
-            res.json({
-                accessToken: session.accessToken
+        if (err) { return res.status(500).send({error: "Server error"}); }
+        let sessionState = {
+            csrfToken: 'asdsadsadas12321ewdas'
+        };
+        sessionState.accessToken = response.data.accessToken ? response.data.accessToken : undefined;
+        sessionStore.createSession(sessionState)
+            .then(session => {
+                res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                res.cookies('csrfToken', session.csrfToken, _.defaults({}, cookieConfig.defaultOptions));
+                res.json(session); //return back the session cookie (contains sessionId, csrfToken, and optionally accessToken);
+            })
+            .catch(error => {
+                res.status(500).send({error: error.message});
             });
-        }).catch(error => {
-            res.status(500).send({error: error.message});
-        });
     });
 
 });
@@ -106,17 +107,17 @@ proxy.use('*', (req, res, next) => {
      */
     // TODO: complete check valid token algorithm (Step 2)
     let isAccessTokenValid = (token) => {
-        return true;
+        return token ? true : false;
     };
     // TODO: complete refreshing the expired/invalid token (Step 8)
     let refreshAccessToken = (oldtoken) => {
         let refreshedToken = "asdasd";
         return refreshedToken;
     };
-    var reqBody = req.body ? req.body : {};
-    if (  !reqBody.accessToken || (reqBody.accessToken && !isAccessTokenValid(reqBody.accessToken))  ) {
+    let accessToken = req.get("Authorization") ? req.get("Authorization") : null;
+    if (  !accessToken || (accessToken && !isAccessTokenValid(accessToken))  ) {
         // if no access token, or has invalid token
-        return res.status(500).send({error: "Missing access token in request body"});
+        return res.status(500).send({error: "Missing access token in request header"});
     } else {
         // API Token is Valid
         GenericAPI.sendRequestToApi(req, function(err, response){

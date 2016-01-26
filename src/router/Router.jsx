@@ -107,6 +107,54 @@ export default class AppRouter {
     }
 
     /**
+     static loadSession (req, res, next) {
+        if (req.method == 'GET') {
+            // Add/Update cookie
+            let csrfToken = uuid.v4(); // TODO: use generation of csrf token
+
+            if (_.isEmpty(req.signedCookies) && _.isEmpty(req.signedCookies.sessionId)) {
+                // No cookie, so add cookie & new session token
+                sessionStore.createSession({
+                    csrfToken: csrfToken
+                }).then(session => {
+                    res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                    res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+                    next();
+                });
+            } else {
+                // Has cookie, retrieve session & Update session
+                sessionStore.getSession(req.signedCookies.sessionId)
+                    .then(existingSession => {
+                        // existing session, so update it
+                        existingSession.state = {
+                            csrfToken: csrfToken
+                        };
+                        sessionStore.updateSession(existingSession)
+                            .then(session => {
+                                res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                                res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+                                next();
+                            });
+                    })
+                    .catch(error => {
+                        // no existing session, so create new one
+                        sessionStore.createSession({
+                            csrfToken: csrfToken
+                        }).then(session => {
+                            res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                            res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+                            next();
+                        });
+                    });
+
+            }
+
+        }
+
+    }
+     */
+
+    /**
      * Server side rendering - Website serving
      */
     static serve(req, res, next) {
