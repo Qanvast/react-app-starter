@@ -7,11 +7,16 @@ import _ from 'lodash';
 import moment from 'moment';
 import uuid from 'uuid';
 import validator from 'validator';
+import Tokens from 'csrf';
+import crypto from 'crypto';
 
 /**========================================
  * Utilities
  ========================================**/
 import e from '../e';
+import appConfig from '../../configs/app';
+
+var tokens = new Tokens();
 
 class Session {
     constructor(state) {
@@ -42,20 +47,22 @@ class Session {
         return `session:${id}`;
     }
 
+    static generateCsrfToken () {
+        return tokens.create(appConfig.csrfSecret);
+    }
+
     get key () {
         return Session.generateKey(this._id);
     }
 
     verifyCsrfToken (csrfToken) {
         // Old CSRF tokens are still valid for 5 mins.
-        return false;
-
-        //return (
-        //    this._state.oldCsrfToken != null
-        //    && this._state.refreshTimestamp != null
-        //    && this._state.oldCsrfToken === csrfToken
-        //    && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp)
-        //);
+        return (
+            this._state.oldCsrfToken != null  && this._state.refreshTimestamp != null
+            && this._state.oldCsrfToken === csrfToken
+            && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp)
+            && tokens.verify(appConfig.csrfSecret, csrfToken)
+        );
     }
 
     get id () {

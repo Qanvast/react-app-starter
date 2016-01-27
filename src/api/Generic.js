@@ -1,3 +1,5 @@
+'use strict';
+
 // Libraries
 import _ from 'lodash';
 import fetch from 'isomorphic-fetch';
@@ -9,8 +11,8 @@ export default {
 
     sendRequestToApi: function(req, callback) {
 
-        let reqUrl = '/' + req.originalUrl.split('/').splice(2).join('/'); //req.params[0];
-        let reqBody = req.body ? req.body : {};
+        let reqUrl = '/' + req.originalUrl.split('/').splice(2).join('/'); // to get the url path + query parameters (e.g. /users?page=1&per_page_count=5
+
         let options = {
             method: req.method,
             headers: {
@@ -18,11 +20,21 @@ export default {
                 'Content-Type': 'application/json'
             }
         };
+
         if (_.indexOf(hasBodyMethods, req.method.toUpperCase()) > -1) {
-            options.body = JSON.stringify(reqBody);
-        };
+            options.body = JSON.stringify(req.body);
+        }
+
         fetch(API_BASE_URL+reqUrl, options)
-            .then(this.checkResponseStatus)
+            .then(response => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response
+                } else {
+                    var error = new Error(response.statusText)
+                    error.response = response
+                    throw error
+                }
+            })
             .then(response => response.json())
             .then(function(data) {
                 callback(null, data);
@@ -33,14 +45,37 @@ export default {
 
     },
 
-    checkResponseStatus: function(response){
-        if (response.status >= 200 && response.status < 300) {
-            return response
-        } else {
-            var error = new Error(response.statusText)
-            error.response = response
-            throw error
-        }
+    sendRefreshTokenRequest: function(tokens, callback) {
+        let options = {
+            method: 'POST',
+            credentials: 'include',
+            body: JSON.stringify({
+                tokens: tokens
+            }),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        };
+
+        fetch(API_BASE_URL + '/refreshtoken', options)
+            .then(response => {
+                if (response.status >= 200 && response.status < 300) {
+                    return response
+                } else {
+                    var error = new Error(response.statusText)
+                    error.response = response
+                    throw error
+                }
+            })
+            .then(response => response.json())
+            .then(function(data) {
+                callback(null, data);
+            })
+            .catch(function(error) {
+                callback(error, null);
+            });
     }
+
 };
 

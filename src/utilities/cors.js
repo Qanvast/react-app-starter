@@ -1,4 +1,3 @@
-'use strict';
 
 /**========================================
  * Libraries
@@ -20,7 +19,7 @@ export default (env) => {
         env = 'development';
     }
 
-    var options = {
+    let options = {
         credentials: true // Access-Control-Allow-Credentials: true
     };
 
@@ -46,7 +45,7 @@ export default (env) => {
             }
         }
 
-        var error = null;
+        let error = null;
 
         if (originIsWhitelisted === false) {
             error = e.throwForbiddenError();

@@ -1,15 +1,14 @@
-'use strict';
 
 /**
  * Module dependencies.
  */
 import { default as _debug } from 'debug';
-let debug = _debug('react-app-starter');
+const debug = _debug('react-app-starter');
 
 /**
  * Express app dependencies.
  */
-import express, { Router as expressRouter } from 'express';
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from './utilities/cors';
 import hbs from 'express-handlebars';
@@ -17,12 +16,12 @@ import path from 'path';
 import favicon from 'serve-favicon';
 import logger from 'morgan';
 
-import _ from 'lodash';
+// import _ from 'lodash';
 
 /**
  * Utilities
  */
-import e from './utilities/e';
+// import e from './utilities/e';
 
 /**
  * Configs
@@ -32,9 +31,9 @@ import cookieConfig from './configs/cookie';
 /**========================================
  * Bootstrapping Express.js App
  ========================================**/
-var app = express();
+const app = express();
 
-var env = app.get('env').toLowerCase();
+const env = app.get('env').toLowerCase();
 
 // disable `X-Powered-By` HTTP header
 app.disable('x-powered-by');
@@ -43,7 +42,7 @@ app.disable('x-powered-by');
 app.enable('trust proxy');
 
 // view engine setup
-app.engine('hbs', hbs({defaultLayout: 'main', extname: '.hbs'}));
+app.engine('hbs', hbs({ defaultLayout: 'main', extname: '.hbs' }));
 app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'hbs');
 
@@ -85,7 +84,7 @@ app.use(sessionLoader.loadSessionOnReq, Router.serve);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-    let error = new Error('Not Found');
+    const error = new Error('Not Found');
     error.status = 404;
     next(error);
 });
@@ -93,12 +92,12 @@ app.use((req, res, next) => {
 /**
  * Get port from environment and store in Express.
  */
-let port = process.env.PORT || '8000';
+const port = process.env.PORT || '8000';
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-let server = app.listen(app.get('port'), () => {
+const server = app.listen(app.get('port'), () => {
     debug('Express server listening on port ' + server.address().port);
 });

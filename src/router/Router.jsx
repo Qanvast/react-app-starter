@@ -123,20 +123,8 @@ export default class AppRouter {
                         let data = alt.flush(); // Take a snapshot of the datastores and flush it
 
                         iso.add(htmlBody, data); // Add the data snapshot to the response
-                        console.log('next(), Router.jsx > req.get(sessionId)', req.signedCookies);
 
-                        // Add/Update cookie
-                        //console.log(`PAGE REQ :: REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
-                        //
-                        //if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
-                        //    // Add cookie
-                        //    console.log(`PAGE REQ :: New session! Initializing cookie with request count 1.`);
-                        //    res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
-                        //} else {
-                        //    // Update cookie
-                        //    console.log(`PAGE REQ :: Old cookie with request count ${req.signedCookies.requestCount}.`);
-                        //    res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
-                        //}
+                        // session detail, like sessionId, csrfToken is stored in req.signedCookies object e.g. {sessionId: 'asdsadasd', csrfToken: 'asdsad'}
 
                         res.render('index', {
                             app: appConfig,

@@ -21,6 +21,7 @@
     "chance": "0.8.0",
     "cookie-parser": "1.4.1",
     "cors": "2.7.1",
+    "csrf": "^3.0.0",
     "debug": "2.2.0",
     "del": "2.2.0",
     "es6-promise": "3.0.2",

@@ -6,6 +6,10 @@
 import _ from 'lodash';
 import chance from 'chance';
 import {Router} from 'express';
+import uuid from 'uuid';
+import bodyParser from 'body-parser';
+import validator from 'validator';
+import moment from 'moment';
 
 /**========================================
  * Utilities
@@ -33,6 +37,8 @@ for (let i = 0; i <= MAX_USERS; i++) {
 }
 
 let api = Router();
+
+api.use(bodyParser.json());
 
 api.get('/users', (req, res) => {
 
@@ -77,15 +83,36 @@ api.get('/user/:id', (req, res) => {
 
 api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i, (req, res, next) => {
     if (req.body.email && req.body.password) {
+        let expiryDate = moment().add(1, 'hours');
         res.json({
-            accessToken: 'ASDkjnJKSnkjslflkjbjBKBASJBDLS@#!123123',
-            email: req.body.email,
-            password: req.body.password
+            user: {
+                email: req.body.email,
+                password: req.body.password
+            },
+            tokens: {
+                token: uuid.v4(),
+                expiry: expiryDate,
+                refreshToken: uuid.v4()
+            }
         });
     } else {
-        res.status(500).send({error: 'Wrong email and password'})
+        res.status(500).send({ error: 'Wrong email and password' })
     }
 
+});
+
+api.post('/refreshtoken', (req, res) => {
+    console.log('api /refreshtoken req.body', req.body, req.query, req.params);
+    if (req.body.tokens && req.body.tokens.refreshToken && validator.isUUID(req.body.tokens.refreshToken, '4')) {
+        //token = uuid.v4 => mock data, will be different with actual value but same behaviour
+        res.json({
+            token: uuid.v4(),
+            expiry: moment().add(1, 'hours'),
+            refreshToken: uuid.v4()
+        })
+    } else {
+        res.status(400).send({ error: 'Missing refresh token'});
+    }
 });
 
 
