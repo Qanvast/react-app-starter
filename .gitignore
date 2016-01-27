@@ -26,3 +26,4 @@ layer-key.pem
 public/
 server/
 views/
+dump.rdb
