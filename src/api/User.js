@@ -47,7 +47,7 @@ class User extends Base {
                             .get('/users')
                             .withCredentials()
                             .query({
-                                page: page,
+                                page,
                                 per_page_count: perPageCount
                             })
                             .use(this.constants.BASE_URL)

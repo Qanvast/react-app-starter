@@ -222,7 +222,7 @@ class UserStore {
         let i = startIndex;
 
         if (_.isArray(userList)) {
-            _.forEach(userList, function(user) {
+            _.forEach(userList, user => {
                 const clonedUser = _.cloneDeep(user);
 
                 // TODO We might want to do a merge here?
