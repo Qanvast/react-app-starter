@@ -14,7 +14,7 @@ import crypto from 'crypto';
  * Utilities
  ========================================**/
 import e from '../e';
-import appConfig from '../../configs/app';
+import csrfConfig from '../../configs/csrf';
 
 var tokens = new Tokens();
 
@@ -48,7 +48,7 @@ class Session {
     }
 
     static generateCsrfToken () {
-        return tokens.create(appConfig.csrfSecret);
+        return tokens.create(csrfConfig.secret);
     }
 
     get key () {
@@ -61,7 +61,7 @@ class Session {
             this._state.oldCsrfToken != null  && this._state.refreshTimestamp != null
             && this._state.oldCsrfToken === csrfToken
             && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp)
-            && tokens.verify(appConfig.csrfSecret, csrfToken)
+            && tokens.verify(csrfConfig.secret, csrfToken)
         );
     }
 
