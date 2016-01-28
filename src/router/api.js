@@ -40,8 +40,27 @@ let api = Router();
 
 api.use(bodyParser.json());
 
-api.get('/users', (req, res) => {
+// Mock a simple OAuth2.0 Bearer token check.
+api.get('*', (req, res, next) => {
+    if (req.headers && req.headers.authorization) {
+        const parts = req.headers.authorization.split(' ');
 
+        if (parts.length == 2) {
+            const scheme = parts[0];
+            const credentials = parts[1];
+
+            // Fits the format we're looking for, so OK! NEXT!
+            if (/^Bearer$/i.test(scheme)
+                && validator.isUUID(credentials, '4')) {
+                return next();
+            }
+        }
+
+        res.sendStatus(401); // Unauthorized.
+    }
+});
+
+api.get('/users', (req, res) => {
     let perPageCount = (req.query.per_page_count == null || req.query.per_page_count < 1) ? 10 : parseInt(req.query.per_page_count),
         page = (req.query.page == null || req.query.page < 0) ? 1 : parseInt(req.query.page),
         startIndex = (page - 1) * perPageCount,
