@@ -58,7 +58,7 @@ export default {
             }
         };
 
-        fetch(API_BASE_URL + '/refreshtoken', options)
+        fetch(API_BASE_URL + '/oauth2/token/refresh', options)
             .then(response => {
                 if (response.status >= 200 && response.status < 300) {
                     return response

@@ -81,9 +81,11 @@ api.get('/user/:id', (req, res) => {
     }
 });
 
+// We're emulating a oauth2 connect/authentication flow here
 api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i, (req, res, next) => {
     if (req.body.email && req.body.password) {
         let expiryDate = moment().add(1, 'hours');
+
         res.json({
             user: {
                 email: req.body.email,
@@ -101,10 +103,9 @@ api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-p
 
 });
 
-api.post('/refreshtoken', (req, res) => {
-    console.log('api /refreshtoken req.body', req.body, req.query, req.params);
+// We're emulating a oauth2 refresh flow here
+api.post('/oauth2/token/refresh', (req, res) => {
     if (req.body.tokens && req.body.tokens.refreshToken && validator.isUUID(req.body.tokens.refreshToken, '4')) {
-        //token = uuid.v4 => mock data, will be different with actual value but same behaviour
         res.json({
             token: uuid.v4(),
             expiry: moment().add(1, 'hours'),
@@ -114,6 +115,5 @@ api.post('/refreshtoken', (req, res) => {
         res.status(400).send({ error: 'Missing refresh token'});
     }
 });
-
 
 export default api;
