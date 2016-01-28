@@ -14,7 +14,7 @@ import moment from 'moment';
 /**========================================
  * Utilities
  ========================================**/
-import e from '../utilities/e';
+import e from 'qanvast-error';
 
 /**========================================
  * Generate random users

@@ -21,7 +21,7 @@ import logger from 'morgan';
 /**
  * Utilities
  */
-// import e from './utilities/e';
+// import e from 'qanvast-error';
 
 /**
  * Configs

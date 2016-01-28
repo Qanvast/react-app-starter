@@ -59,6 +59,7 @@
     "morgan": "1.6.1",
     "object-assign": "4.0.1",
     "pretty-hrtime": "1.0.1",
+    "qanvast-error": "git+ssh://git@bitbucket.org:qanvast/qanvast-error.git#0.0.2",
     "react": "0.14.6",
     "react-bootstrap": "0.28.2",
     "react-dom": "0.14.6",

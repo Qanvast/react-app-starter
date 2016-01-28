@@ -11,7 +11,7 @@ import moment from 'moment';
 /**========================================
  * Utilities
  ========================================**/
-import e from '../utilities/e';
+import e from 'qanvast-error';
 import { Session, SessionStore } from '../utilities/SessionStore';
 import cookieConfig from '../configs/cookie';
 import GenericAPI from '../api/Generic';
