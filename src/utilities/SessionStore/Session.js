@@ -13,7 +13,7 @@ import crypto from 'crypto';
 /**========================================
  * Utilities
  ========================================**/
-import e from '../e';
+import e from 'qanvast-error';
 import csrfConfig from '../../configs/csrf';
 
 var tokens = new Tokens();

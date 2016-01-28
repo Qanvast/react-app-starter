@@ -14,7 +14,7 @@ import Session from './Session';
 /**========================================
  * Utilities
  ========================================**/
-import e from '../e';
+import e from 'qanvast-error';
 
 /**========================================
  * Configs

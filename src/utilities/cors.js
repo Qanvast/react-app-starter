@@ -7,7 +7,7 @@ import cors from 'cors';
 /**========================================
  * Utilities
  ========================================**/
-import e from './e';
+import e from 'qanvast-error';
 
 /**========================================
  * Configs
