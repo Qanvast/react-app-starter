@@ -37,7 +37,7 @@ class SessionStore {
         this.client = redis.createClient(this.options.redis);
     };
 
-    createSession (state) {
+    createSession(state) {
         if (_.isPlainObject(state) && !_.isEmpty(state)) {
             let session = new Session(state);
 
@@ -68,7 +68,7 @@ class SessionStore {
      * @param id Session ID
      * @returns {boolean|object}
      */
-    getSession (id) {
+    getSession(id) {
         if (validator.isUUID(id, '4')) {
             return new Promise((resolve, reject) => {
                 this
@@ -101,7 +101,7 @@ class SessionStore {
      *
      * @param session New session to replace current session
      */
-    updateSession (session) {
+    updateSession(session) {
         if (session instanceof Session) {
             return new Promise((resolve, reject) => {
                 this

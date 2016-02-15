@@ -17,7 +17,7 @@ class User extends Base {
                         http
                             .get('/user/' + id)
                             .withCredentials()
-                            .use(this.constants.BASE_URL)
+                            .use(this.constants.URL_PREFIX)
                             .timeout(this.constants.TIMEOUT_MS)
                             .end(callback);
                     },
@@ -50,7 +50,7 @@ class User extends Base {
                                 page,
                                 per_page_count: perPageCount
                             })
-                            .use(this.constants.BASE_URL)
+                            .use(this.constants.URL_PREFIX)
                             .timeout(this.constants.TIMEOUT_MS)
                             .end(callback);
                     },
@@ -65,39 +65,6 @@ class User extends Base {
                         } else {
                             callback(new Error('Invalid response!'));
                         }
-                    }
-                ], (error, data) => {
-                    if (!error) {
-                        resolve(data);
-                    } else {
-                        reject(error);
-                    }
-                });
-            });
-        };
-    }
-
-    static register(email, name) {
-        return () => {
-            return new Promise((resolve, reject) => {
-                async.waterfall([
-                    callback => {
-                        http
-                            .post('/register')
-                            .withCredentials()
-                            .query({
-                                email,
-                                name
-                            })
-                            .use(this.constants.BASE_URL)
-                            .timeout(this.constants.TIMEOUT_MS)
-                            .end(callback);
-                    },
-
-                    (result, callback) => {
-                        // TODO: Transform the data if necessary.
-                        // TODO: Otherwise, pass it back to the caller.
-                        callback(null, result.body);
                     }
                 ], (error, data) => {
                     if (!error) {

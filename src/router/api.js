@@ -129,9 +129,9 @@ api.post('/oauth2/token/refresh', (req, res) => {
             token: uuid.v4(),
             expiry: moment().add(1, 'hours'),
             refreshToken: uuid.v4()
-        })
+        });
     } else {
-        res.status(400).send({ error: 'Missing refresh token'});
+        res.status(400).send({error: 'Missing refresh token'});
     }
 });
 

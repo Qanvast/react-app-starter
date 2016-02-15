@@ -34,6 +34,12 @@ class Session {
             }
         }
 
+        // Check if a csrf token exists and generate one if necessary.
+        if (!_.isString(this._state.csrfToken) || _.isEmpty(this._state.csrfToken)) {
+            this._state.csrfToken = tokens.create(csrfConfig.secret);
+        }
+
+        // Check existing state's ID and generate new ID if necessary.
         if (this._state.id != null && validator.isUUID(this._state.id, '4')) {
             this._id = this._state.id;
         } else {
@@ -43,19 +49,40 @@ class Session {
         delete this._state.id; // We don't need another ID copy.
     }
 
-    static generateKey (id) {
+    /**
+     * Generates a unique key to represent this session based on the session ID provided.
+     * @returns String
+     */
+    static generateKey(id) {
         return `session:${id}`;
     }
 
-    static generateCsrfToken () {
-        return tokens.create(csrfConfig.secret);
+    /**
+     * Refreshes the session's CSRF token.
+     */
+    generateCsrfToken() {
+        let oldCsrfToken = this._state.csrfToken;
+        let refreshTimestamp = moment();
+
+        this._state.csrfToken = tokens.create(csrfConfig.secret);
+
+        if (_.isString(oldCsrfToken) && !_.isEmpty(oldCsrfToken)) {
+            this._state.oldCsrfToken = oldCsrfToken;
+            this._state.refreshTimestamp = refreshTimestamp;
+        }
+
+        return this._state.csrfToken;
     }
 
-    get key () {
+    /**
+     * Generates a unique key to represent this session based on the session ID.
+     * @returns String
+     */
+    get key() {
         return Session.generateKey(this._id);
     }
 
-    verifyCsrfToken (csrfToken) {
+    verifyCsrfToken(csrfToken) {
         // Old CSRF tokens are still valid for 5 mins.
         return (
             this._state.oldCsrfToken != null  && this._state.refreshTimestamp != null
@@ -65,20 +92,41 @@ class Session {
         );
     }
 
-    get id () {
+    get id() {
         return this._id;
     }
 
-    static set id (id) {
+    static set id(id) {
         throw e.throwServerError('Session ID is immutable.');
     }
 
-    get state () {
+    get csrfToken() {
+        return this._state.csrfToken;
+    }
+
+    set csrfToken(csrfToken) {
+        throw e.throwServerError('Unsupported! Please use the `session.generateCsrfToken()` method.');
+    }
+
+    get hasValidAccessToken() {
+        // TODO Check if token is valid.
+        return false;
+    }
+
+    get state() {
         return _.cloneDeep(this._state);
     }
 
-    set state (state) {
-        this._state = _.cloneDeep(state);
+    static set state(state) {
+        throw e.throwServerError('Session state is immutable.');
+    }
+
+    /**
+     * Merges the new state with the existing state.
+     * @param newState
+     */
+    updateState(state) {
+        _.merge(this._state, state);
     }
 
     toString() {
