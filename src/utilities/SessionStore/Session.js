@@ -20,17 +20,21 @@ var tokens = new Tokens();
 
 class Session {
     constructor(state) {
-        if (_.isPlainObject(state) && !_.isEmpty(state)) {
+        if (_.isPlainObject(state)) {
             this._state = _.cloneDeep(state);
-        } else if (_.isString(state)) {
-            try {
-                this._state = JSON.parse(state);
-            } catch (error) {
-                throw e.throwServerError('Session is corrupted.');
-            }
+        } else {
+            if (_.isString(state)) {
+                try {
+                    this._state = JSON.parse(state);
+                } catch (error) {
+                    throw e.throwServerError('Session is corrupted.');
+                }
 
-            if (!_.isPlainObject(this._state) || _.isEmpty(this._state)) {
-                throw e.throwServerError('Session is corrupted.');
+                if (!_.isPlainObject(this._state) || _.isEmpty(this._state)) {
+                    throw e.throwServerError('Session is corrupted.');
+                }
+            } else {
+                this._state = {};
             }
         }
 

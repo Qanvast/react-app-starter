@@ -70,8 +70,8 @@ proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset
         })
         .then(session => {
             // NEVER INCLUDE access tokens in the cookie for security reasons.
-            res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-            res.cookies('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+            res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+            res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
 
             const data = _.cloneDeep(response.data);
 
@@ -110,8 +110,8 @@ proxy.use((req, res, next) => {
 
     promise
         .then(data => {
-            res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-            res.cookies('csrfToken', session.csrfToken, _.defaults({ httpOnly: false }, cookieConfig.defaultOptions));
+            res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+            res.cookie('csrfToken', session.csrfToken, _.defaults({ httpOnly: false }, cookieConfig.defaultOptions));
 
             res.json(data);
         });
@@ -123,5 +123,50 @@ proxy.use((error, req, res, next) => {
         .status(error.status || 500)
         .send(response);
 });
+
+/**
+ * Middleware to load session based on cookie.
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+export function sessionLoader (req, res, next) {
+    switch (req.method) {
+        case 'GET':
+            let promise;
+
+            if (!req.signedCookies.sessionId || _.isEmpty(req.signedCookies.sessionId) || req.signedCookies.sessionId === 'undefined' ) {
+                // No valid session in cookie, so create new session.
+                promise = sessionStore.createSession();
+            } else {
+                // Retrieve session and check if its valid.
+                promise = sessionStore
+                    .getSession(req.signedCookies.sessionId)
+                    .then(existingSession => {
+                        if (existingSession === false) {
+                            // No existing session so we should create a new session.
+                            return sessionStore.createSession();
+                        } else {
+                            return existingSession;
+                        }
+                    });
+            }
+
+            promise
+                .then(session => {
+                    res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                    res.cookie('csrfToken', session.csrfToken, _.defaults({ httpOnly: false }, cookieConfig.defaultOptions));
+                    next();
+                })
+                .catch(error => {
+                    next(error);
+                });
+            break;
+        default:
+            next();
+            break;
+    }
+}
 
 export default proxy;

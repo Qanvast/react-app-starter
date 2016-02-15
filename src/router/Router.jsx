@@ -20,7 +20,7 @@ import cookieConfig from '../configs/cookie';
 import React from 'react';
 import { render } from 'react-dom';
 import { renderToString } from 'react-dom/server';
-import {Router, match, RouterContext} from 'react-router';
+import { Router, match, RouterContext } from 'react-router';
 import { createHistory } from 'history';
 
 /*=================================
@@ -74,7 +74,7 @@ function getDataForRoutes (renderProps, callback) {
     ], callback);
 }
 
-export default class AppRouter {
+class AppRouter {
     /**
      * Client side router initialization.
      * @param container
@@ -142,3 +142,5 @@ export default class AppRouter {
         });
     }
 }
+
+export default AppRouter;

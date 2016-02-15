@@ -78,8 +78,9 @@ app.use('/api', api);
  * React app
  ========================================**/
 import Router from './router';
+import { sessionLoader } from './router/proxy';
 
-app.use(Router.serve);
+app.use(sessionLoader, Router.serve);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

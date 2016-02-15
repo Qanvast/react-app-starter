@@ -38,7 +38,7 @@ class SessionStore {
     };
 
     createSession(state) {
-        if (_.isPlainObject(state) && !_.isEmpty(state)) {
+        if (_.isPlainObject(state) || _.isEmpty(state)) {
             let session = new Session(state);
 
             return new Promise((resolve, reject) => {

@@ -5,7 +5,7 @@
  ========================================**/
 import _ from 'lodash';
 import chance from 'chance';
-import {Router} from 'express';
+import { Router } from 'express';
 import uuid from 'uuid';
 import bodyParser from 'body-parser';
 import validator from 'validator';
