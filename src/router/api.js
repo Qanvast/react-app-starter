@@ -55,9 +55,9 @@ api.get('*', (req, res, next) => {
                 return next();
             }
         }
-
-        res.sendStatus(401); // Unauthorized.
     }
+
+    res.sendStatus(401); // Unauthorized.
 });
 
 api.get('/users', (req, res) => {
