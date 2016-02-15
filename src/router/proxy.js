@@ -37,9 +37,9 @@ proxy.use((req, res, next) => {
         sessionStore
             .getSession(req.signedCookies.sessionId)
             .then(session => {
-                req.session = session;
+                if (req.session !== false && req.session.verifyCsrfToken(csrfToken)) {
+                    req.session = session;
 
-                if (req.session.verifyCsrfToken(csrfToken)) {
                     next();
                 } else {
                     next(e.throwForbiddenError());
@@ -61,7 +61,11 @@ proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset
             if (_.has(data, 'tokens.token')
                 && _.has(data, 'tokens.expiry')
                 && _.has(data, 'tokens.refreshToken')) {
-                return sessionStore.createSession(data.tokens);
+                // Update the state and generate a new CSRF token.
+                req.session.updateState(data.tokens);
+                req.session.generateCsrfToken();
+
+                return sessionStore.updateSession(req.session);
             }
         })
         .then(session => {
@@ -107,7 +111,7 @@ proxy.use((req, res, next) => {
     promise
         .then(data => {
             res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-            res.cookies('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
+            res.cookies('csrfToken', session.csrfToken, _.defaults({ httpOnly: false }, cookieConfig.defaultOptions));
 
             res.json(data);
         });
