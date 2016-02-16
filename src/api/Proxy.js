@@ -28,7 +28,7 @@ class Proxy extends Base {
             }
 
             return new Promise((resolve, reject) => {
-                fetch(`${this.constants.BASE_URL}/${req.originalUrl.split('/').splice(2).join('/')}`)
+                fetch(`${this.constants.BASE_URL}/${req.originalUrl.split('/').splice(2).join('/')}`, options)
                     .then(response => {
                         if (response.status >= 200 && response.status < 300) {
                             let parsedResponse = response.json();
