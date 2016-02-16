@@ -23,7 +23,7 @@ import cookieConfig from '../../configs/cookie';
 
 const DEFAULT_OPTIONS = {
     session: {
-        maxAge: cookieConfig.defaultOptions.maxAge +  5 * 60 // Cookie's maxage + 5 mins
+        maxAge: cookieConfig.defaultOptions.maxAge + 5 * 60 // Cookie's maxage + 5 mins
     },
     redis: {
         host: 'localhost',
@@ -35,7 +35,7 @@ class SessionStore {
     constructor(options) {
         this.options = _.defaults({}, options, DEFAULT_OPTIONS);
         this.client = redis.createClient(this.options.redis);
-    };
+    }
 
     createSession(state) {
         if (_.isPlainObject(state) || _.isEmpty(state)) {

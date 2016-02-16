@@ -26,6 +26,10 @@ class Session {
             if (_.isString(state)) {
                 try {
                     this._state = JSON.parse(state);
+
+                    if (_.has(this._state, 'refreshTimestamp')) {
+                        this._state.refreshTimestamp = moment(this._state.refreshTimestamp);
+                    }
                 } catch (error) {
                     throw e.throwServerError('Session is corrupted.');
                 }
@@ -89,10 +93,8 @@ class Session {
     verifyCsrfToken(csrfToken) {
         // Old CSRF tokens are still valid for 5 mins.
         return (
-            this._state.oldCsrfToken != null  && this._state.refreshTimestamp != null
-            && this._state.oldCsrfToken === csrfToken
-            && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp)
-            && tokens.verify(csrfConfig.secret, csrfToken)
+            tokens.verify(csrfConfig.secret, csrfToken)
+                || (this._state.oldCsrfToken != null  && this._state.refreshTimestamp != null && this._state.oldCsrfToken === csrfToken && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp))
         );
     }
 
@@ -114,7 +116,7 @@ class Session {
 
     get hasValidAccessToken() {
         // TODO Check if token is valid.
-        return false;
+        return true;
     }
 
     get state() {
@@ -137,6 +139,10 @@ class Session {
         var snapshot =  _.cloneDeep(this._state);
 
         snapshot.id = this._id;
+
+        if (_.has(snapshot, 'refreshTimestamp')) {
+            snapshot.refreshTimestamp = snapshot.refreshTimestamp.valueOf();
+        }
 
         return JSON.stringify(snapshot);
     }

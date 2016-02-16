@@ -1,4 +1,5 @@
 // Libraries
+import _ from 'lodash';
 import async from 'async';
 import http from 'superagent';
 // import validator from 'validator';
@@ -9,13 +10,16 @@ import Base from './Base';
 class User extends Base {
     static get(id) {
         return () => {
+            const headers = {};
+
+            headers['x-csrf-token'] = this.getCsrfToken();
+
             return new Promise((resolve, reject) => {
                 async.waterfall([
                     callback => {
-                        // TODO Refactor this out to a DAO layer,
-                        // include token in the URL query parameter
                         http
                             .get('/user/' + id)
+                            .set(headers)
                             .withCredentials()
                             .use(this.constants.URL_PREFIX)
                             .timeout(this.constants.TIMEOUT_MS)
@@ -40,11 +44,18 @@ class User extends Base {
 
     static getPage(page, perPageCount) {
         return () => {
+            const headers = {};
+
+            headers['x-csrf-token'] = this.getCsrfToken();
+
+            console.log(`HEADERS: ${JSON.stringify(headers)}`);
+
             return new Promise((resolve, reject) => {
                 async.waterfall([
                     callback => {
                         http
                             .get('/users')
+                            .set(headers)
                             .withCredentials()
                             .query({
                                 page,

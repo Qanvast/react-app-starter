@@ -2,15 +2,13 @@
  * Packages
  ========================================**/
 import _ from 'lodash';
-import uuid from 'uuid';
 import { Router } from 'express';
-import moment from 'moment';
 
 /**========================================
  * Utilities
  ========================================**/
 import e from 'qanvast-error';
-import { Session, SessionStore } from '../utilities/SessionStore';
+import { SessionStore } from '../utilities/SessionStore';
 import cookieConfig from '../configs/cookie';
 import ProxyAPI from '../api/Proxy';
 
@@ -37,7 +35,7 @@ proxy.use((req, res, next) => {
         sessionStore
             .getSession(req.signedCookies.sessionId)
             .then(session => {
-                if (req.session !== false && req.session.verifyCsrfToken(csrfToken)) {
+                if (session !== false && session.verifyCsrfToken(csrfToken)) {
                     req.session = session;
 
                     next();
@@ -110,8 +108,10 @@ proxy.use((req, res, next) => {
 
     promise
         .then(data => {
-            res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-            res.cookie('csrfToken', session.csrfToken, _.defaults({ httpOnly: false }, cookieConfig.defaultOptions));
+            res.cookie('sessionId', req.session.id, _.defaults({}, cookieConfig.defaultOptions));
+            res.cookie('csrfToken', req.session.csrfToken, _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions));
+
+            console.log(`DATA:: ${JSON.stringify(data)}`);
 
             res.json(data);
         });
@@ -119,6 +119,11 @@ proxy.use((req, res, next) => {
 
 // Top level error handler.
 proxy.use((error, req, res, next) => {
+    let response = {
+        message: (error.message != null) ? error.message : `Oops! This is embarrassing! Something went wrong but don't worry! We'll fix it soon!`,
+        error: error
+    };
+
     res
         .status(error.status || 500)
         .send(response);
@@ -156,7 +161,7 @@ export function sessionLoader (req, res, next) {
             promise
                 .then(session => {
                     res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-                    res.cookie('csrfToken', session.csrfToken, _.defaults({ httpOnly: false }, cookieConfig.defaultOptions));
+                    res.cookie('csrfToken', session.csrfToken, _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions));
                     next();
                 })
                 .catch(error => {
