@@ -31,7 +31,10 @@ class Proxy extends Base {
             }
 
             return new Promise((resolve, reject) => {
-                fetch(`${this.constants.BASE_URL}/${req.originalUrl.split('/').splice(2).join('/')}`, options)
+                const reqPath = req.originalUrl.split('/').splice(2).join('/');
+                const reqUrl = `${this.constants.BASE_URL}/${reqPath}`;
+
+                fetch(reqUrl, options)
                     .then(response => {
                         if (response.status >= 200 && response.status < 300) {
                             return response.json();
@@ -59,13 +62,13 @@ class Proxy extends Base {
 
     static refreshToken(req) {
         if (__SERVER__) {
-            let body = {};
+            const body = {};
 
-            if (req.session != null && req.session.hasRefreshToken) {
+            if (req.session == null || !req.session.hasRefreshToken) {
+                return Promise.reject(e.throwForbiddenError());
+            } else {
                 body.refreshToken = req.session.refreshToken;
                 // TODO Add user ID
-            } else {
-                return Promise.reject(e.throwForbiddenError());
             }
 
             const options = {

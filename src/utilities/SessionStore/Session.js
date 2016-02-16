@@ -1,5 +1,3 @@
-'use strict';
-
 /**========================================
  * Packages
  ========================================**/
@@ -8,7 +6,6 @@ import moment from 'moment';
 import uuid from 'uuid';
 import validator from 'validator';
 import Tokens from 'csrf';
-import crypto from 'crypto';
 
 /**========================================
  * Utilities
