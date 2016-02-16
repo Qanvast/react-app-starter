@@ -15,7 +15,7 @@ import ProxyAPI from '../api/Proxy';
 /**========================================
  * Local variables
  ========================================**/
-const proxy = Router(); // eslint-disable-line new-cap
+const proxy = Router();
 const sessionStore = new SessionStore();
 
 // Verify CSRF token for all incoming requests.
@@ -36,7 +36,7 @@ proxy.use((req, res, next) => {
             .getSession(req.signedCookies.sessionId)
             .then(session => {
                 if (session !== false && session.verifyCsrfToken(csrfToken)) {
-                    req.session = session; // eslint-disable-line no-param-reassign
+                    req.session = session;
 
                     next();
                 } else {
@@ -52,51 +52,48 @@ proxy.use((req, res, next) => {
 });
 
 // Forward connect requests to API.
-proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i,
-    (req, res, next) => {
-        ProxyAPI
-            .forward(req)
-            .then(data => {
-                if (_.has(data, 'tokens.token')
-                    && _.has(data, 'tokens.expiry')
-                    && _.has(data, 'tokens.refreshToken')) {
-                    // Update the state and generate a new CSRF token.
-                    req.session.updateState(data.tokens);
-                    req.session.generateCsrfToken();
+proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i, (req, res, next) => {
+    ProxyAPI
+        .forward(req)
+        .then(data => {
+            if (_.has(data, 'tokens.token')
+                && _.has(data, 'tokens.expiry')
+                && _.has(data, 'tokens.refreshToken')) {
+                // Update the state and generate a new CSRF token.
+                req.session.updateAccessToken(data.tokens.token, data.tokens.expiry, data.tokens.refreshToken);
+                req.session.generateCsrfToken();
 
-                    return sessionStore.updateSession(req.session);
-                }
-            })
-            .then(session => {
-                // NEVER INCLUDE access tokens in the cookie for security reasons.
-                res.cookie('sessionId', session.id,
-                    _.defaults({}, cookieConfig.defaultOptions));
-                res.cookie('csrfToken', session.csrfToken,
-                    _.defaults({ httpOnly: false }, cookieConfig.defaultOptions));
+                return [data, sessionStore.updateSession(req.session)];
+            }
+        })
+        .then((data, session) => {
+            // NEVER INCLUDE access tokens in the cookie for security reasons.
+            res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+            res.cookie('csrfToken', session.csrfToken, _.defaults({httpOnly: false}, cookieConfig.defaultOptions));
 
-                const data = _.cloneDeep(response.data);
+            const formattedData = _.cloneDeep(data);
 
-                if (_.has(data, 'tokens')) {
-                    delete data.tokens;
-                }
+            if (_.has(formattedData, 'tokens')) {
+                delete formattedData.tokens;
+            }
 
-                res.json(data);
-            })
-            .catch(error => {
-                next(e.throwBadRequestError(error.message, error));
-            });
-    });
+            res.json(formattedData);
+        })
+        .catch(error => {
+            next(e.throwBadRequestError(error.message, error));
+        });
+});
 
 // Forward standard requests to API.
-proxy.use((req, res) => {
+proxy.use((req, res, next) => {
     let promise;
 
-    if (!req.session.hasValidAccessToken) {
+    if (!req.session.hasValidAccessToken && req.session.hasRefreshToken) {
         promise = ProxyAPI
-            .refreshToken(req.session.state.refreshToken)
-            .then((tokens) => {
+            .refreshToken(req)
+            .then((authorization) => {
                 // Update the state and generate a new CSRF token.
-                req.session.updateState(tokens);
+                req.session.updateAccessToken(authorization.token, authorization.expiry, authorization.refreshToken);
                 req.session.generateCsrfToken();
 
                 // Update the session in the session store.
@@ -104,31 +101,28 @@ proxy.use((req, res) => {
             })
             .then(() => {
                 return ProxyAPI.forward(req);
-            });
+            })
     } else {
         promise = ProxyAPI.forward(req);
     }
 
     promise
         .then(data => {
-            res.cookie('sessionId', req.session.id,
-                _.defaults({}, cookieConfig.defaultOptions));
-            res.cookie('csrfToken', req.session.csrfToken,
-                _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions));
-
-            // console.log(`DATA:: ${JSON.stringify(data)}`);
+            res.cookie('sessionId', req.session.id, _.defaults({}, cookieConfig.defaultOptions));
+            res.cookie('csrfToken', req.session.csrfToken, _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions));
 
             res.json(data);
+        })
+        .catch(error => {
+            next(error);
         });
 });
 
 // Top level error handler.
-proxy.use((error, req, res, next) => {  // eslint-disable-line no-unused-vars
-    const response = {
-        message: (error.message != null) ?
-            error.message : `Oops! This is embarrassing!
-                            Something went wrong but don't worry! We'll fix it soon!`,
-        error
+proxy.use((error, req, res, next) => {
+    let response = {
+        message: (error.message != null) ? error.message : `Oops! This is embarrassing! Something went wrong but don't worry! We'll fix it soon!`,
+        error: error
     };
 
     res
@@ -143,45 +137,41 @@ proxy.use((error, req, res, next) => {  // eslint-disable-line no-unused-vars
  * @param res
  * @param next
  */
-export function sessionLoader(req, res, next) {
+export function sessionLoader (req, res, next) {
     switch (req.method) {
-    case 'GET':
-        let promise;
+        case 'GET':
+            let promise;
 
-        if (!req.signedCookies.sessionId ||
-            _.isEmpty(req.signedCookies.sessionId) ||
-            req.signedCookies.sessionId === 'undefined') {
-            // No valid session in cookie, so create new session.
-            promise = sessionStore.createSession();
-        } else {
-            // Retrieve session and check if its valid.
-            promise = sessionStore
-                .getSession(req.signedCookies.sessionId)
-                .then(existingSession => {
-                    if (existingSession === false) {
-                        // No existing session so we should create a new session.
-                        return sessionStore.createSession();
-                    }
+            if (!req.signedCookies.sessionId || _.isEmpty(req.signedCookies.sessionId) || req.signedCookies.sessionId === 'undefined' ) {
+                // No valid session in cookie, so create new session.
+                promise = sessionStore.createSession();
+            } else {
+                // Retrieve session and check if its valid.
+                promise = sessionStore
+                    .getSession(req.signedCookies.sessionId)
+                    .then(existingSession => {
+                        if (existingSession === false) {
+                            // No existing session so we should create a new session.
+                            return sessionStore.createSession();
+                        } else {
+                            return existingSession;
+                        }
+                    });
+            }
 
-                    return existingSession;
+            promise
+                .then(session => {
+                    res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                    res.cookie('csrfToken', session.csrfToken, _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions));
+                    next();
+                })
+                .catch(error => {
+                    next(error);
                 });
-        }
-
-        promise
-            .then(session => {
-                res.cookie('sessionId', session.id,
-                    _.defaults({}, cookieConfig.defaultOptions));
-                res.cookie('csrfToken', session.csrfToken,
-                    _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions));
-                next();
-            })
-            .catch(error => {
-                next(error);
-            });
-        break;
-    default:
-        next();
-        break;
+            break;
+        default:
+            next();
+            break;
     }
 }
 

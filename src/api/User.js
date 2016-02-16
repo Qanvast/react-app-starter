@@ -47,8 +47,6 @@ class User extends Base {
 
             headers['x-csrf-token'] = this.getCsrfToken();
 
-            // console.log(`HEADERS: ${JSON.stringify(headers)}`);
-
             return new Promise((resolve, reject) => {
                 async.waterfall([
                     callback => {

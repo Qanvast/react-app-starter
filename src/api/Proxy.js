@@ -21,22 +21,29 @@ class Proxy extends Base {
                 }
             };
 
+            if (req.session != null && req.session.hasValidAccessToken) {
+                options.headers.Authorization = `Bearer ${req.session.accessToken}`;
+            }
+
             // We just pass on the body
             if (_.indexOf(methodsWithBody, req.method.toUpperCase()) >= 0) {
                 options.body = JSON.stringify(req.body);
             }
 
             return new Promise((resolve, reject) => {
-                fetch(`${this.constants.BASE_URL}/${req.originalUrl.split('/')
-                    .splice(2).join('/')}`)
+                fetch(`${this.constants.BASE_URL}/${req.originalUrl.split('/').splice(2).join('/')}`, options)
                     .then(response => {
                         if (response.status >= 200 && response.status < 300) {
-                            const parsedResponse = response.json();
+                            return response.json();
+                        }
 
-                            resolve(parsedResponse.data);
-                        } else {
-                            reject(e.throwServerError(response.statusText ||
-                                                        'Unsuccessful HTTP response.'));
+                        reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.'));
+
+                        return false;
+                    })
+                    .then(data => {
+                        if (data !== false) {
+                            resolve(data);
                         }
                     })
                     .catch(error => {
@@ -50,15 +57,21 @@ class Proxy extends Base {
         }
     }
 
-    static refreshToken(refreshToken, userId) {
+    static refreshToken(req) {
         if (__SERVER__) {
+            let body = {};
+
+            if (req.session != null && req.session.hasRefreshToken) {
+                body.refreshToken = req.session.refreshToken;
+                // TODO Add user ID
+            } else {
+                return Promise.reject(e.throwForbiddenError());
+            }
+
             const options = {
                 method: 'POST',
                 credentials: 'include',
-                body: JSON.stringify({
-                    refreshToken,
-                    userId
-                }),
+                body: JSON.stringify(body),
                 headers: {
                     Accept: 'application/json',
                     'Content-Type': 'application/json'
@@ -69,22 +82,26 @@ class Proxy extends Base {
                 fetch(this.constants.BASE_URL + '/oauth2/token/refresh', options)
                     .then(response => {
                         if (response.status >= 200 && response.status < 300) {
-                            const parsedResponse = response.json();
+                            return response.json();
+                        } else {
+                            reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.'));
 
-                            if (_.has(parsedResponse.data, 'tokens.token')
-                                && _.has(parsedResponse.data, 'tokens.expiry')
-                                && _.has(parsedResponse.data, 'tokens.refreshToken')) {
-                                resolve(parsedResponse.data.tokens);
+                            return false;
+                        }
+                    })
+                    .then(data => {
+                        if (data !== false) {
+                            if (_.has(data, 'tokens.token')
+                                && _.has(data, 'tokens.expiry')
+                                && _.has(data, 'tokens.refreshToken')) {
+                                resolve(data.tokens);
                             } else {
                                 reject(e.throwServerError('Corrupted response.'));
                             }
-                        } else {
-                            reject(e.throwServerError(response.statusText ||
-                                                        'Unsuccessful HTTP response.'));
                         }
                     })
-                    .catch(error => {
-                        reject(error);
+                    .catch(function(error) {
+                        reject(e.throwServerError('Corrupted response.', error));
                     });
             });
         }
