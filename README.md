@@ -6,7 +6,8 @@ React App Starter
  * Written using ES6 style, with Babel integration.
  * Designed to be used for real world applications.
       * Search Engine Optimizations (SEO) and social network meta tags.
-      * Interface with existing API.
+      * Interface with existing API via a proxy that secures the Oauth 2.0 token on the web server.
+      
 
 ## Main NPM Libraries Used
  * `alt` and `iso` ([More Info Here](http://www.slideshare.net/spikebrehm/the-evolution-of-airbnbs-frontend))
@@ -20,10 +21,9 @@ React App Starter
  * `react-bootstrap`
  * `react-ga`
  * `react-router`
- * `superagent` (To be replaced with either `axios` or `isomorphic-fetch`)
+ * `superagent` (To be replaced with either `isomorphic-fetch`)
  
 ## TODO
- * Implement proxy API simulation.
  * Replace alt with redux.
 
 > More Information Soon...
