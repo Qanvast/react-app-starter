@@ -3,7 +3,7 @@ import _ from 'lodash';
 import cookie from 'cookie';
 import prefix from 'superagent-prefix';
 
-const BASE_URL = `${__SERVER__ ? 'http://localhost:8000/api': 'http://localhost:8000/proxy'}`;
+const BASE_URL = `${__SERVER__ ? 'http://localhost:8000/api' : 'http://localhost:8000/proxy'}`;
 
 class API {
     constructor() {
@@ -32,7 +32,7 @@ class API {
 }
 
 API.constants = {
-    BASE_URL: BASE_URL,
+    BASE_URL,
     URL_PREFIX: prefix(BASE_URL),
     TIMEOUT_MS: 500
 };

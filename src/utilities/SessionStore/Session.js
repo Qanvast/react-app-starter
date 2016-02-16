@@ -1,5 +1,3 @@
-'use strict';
-
 /**========================================
  * Packages
  ========================================**/
@@ -8,7 +6,6 @@ import moment from 'moment';
 import uuid from 'uuid';
 import validator from 'validator';
 import Tokens from 'csrf';
-import crypto from 'crypto';
 
 /**========================================
  * Utilities
@@ -16,45 +13,45 @@ import crypto from 'crypto';
 import e from 'qanvast-error';
 import csrfConfig from '../../configs/csrf';
 
-var tokens = new Tokens();
+const tokens = new Tokens();
 
 class Session {
     constructor(state) {
         if (_.isPlainObject(state)) {
-            this._state = _.cloneDeep(state);
+            this.stateObj = _.cloneDeep(state);
         } else {
             if (_.isString(state)) {
                 try {
-                    this._state = JSON.parse(state);
+                    this.stateObj = JSON.parse(state);
 
-                    if (_.has(this._state, 'refreshTimestamp')) {
-                        this._state.refreshTimestamp = moment(this._state.refreshTimestamp);
+                    if (_.has(this.stateObj, 'refreshTimestamp')) {
+                        this.stateObj.refreshTimestamp = moment(this.stateObj.refreshTimestamp);
                     }
                 } catch (error) {
                     throw e.throwServerError('Session is corrupted.');
                 }
 
-                if (!_.isPlainObject(this._state) || _.isEmpty(this._state)) {
+                if (!_.isPlainObject(this.stateObj) || _.isEmpty(this.stateObj)) {
                     throw e.throwServerError('Session is corrupted.');
                 }
             } else {
-                this._state = {};
+                this.stateObj = {};
             }
         }
 
         // Check if a csrf token exists and generate one if necessary.
-        if (!_.isString(this._state.csrfToken) || _.isEmpty(this._state.csrfToken)) {
-            this._state.csrfToken = tokens.create(csrfConfig.secret);
+        if (!_.isString(this.stateObj.csrfToken) || _.isEmpty(this.stateObj.csrfToken)) {
+            this.stateObj.csrfToken = tokens.create(csrfConfig.secret);
         }
 
         // Check existing state's ID and generate new ID if necessary.
-        if (this._state.id != null && validator.isUUID(this._state.id, '4')) {
-            this._id = this._state.id;
+        if (this.stateObj.id != null && validator.isUUID(this.stateObj.id, '4')) {
+            this.idFromStateObj = this.stateObj.id;
         } else {
-            this._id = uuid.v4();
+            this.idFromStateObj = uuid.v4();
         }
 
-        delete this._state.id; // We don't need another ID copy.
+        delete this.stateObj.id; // We don't need another ID copy.
     }
 
     /**
@@ -69,17 +66,17 @@ class Session {
      * Refreshes the session's CSRF token.
      */
     generateCsrfToken() {
-        let oldCsrfToken = this._state.csrfToken;
-        let refreshTimestamp = moment();
+        const oldCsrfToken = this.stateObj.csrfToken;
+        const refreshTimestamp = moment();
 
-        this._state.csrfToken = tokens.create(csrfConfig.secret);
+        this.stateObj.csrfToken = tokens.create(csrfConfig.secret);
 
         if (_.isString(oldCsrfToken) && !_.isEmpty(oldCsrfToken)) {
-            this._state.oldCsrfToken = oldCsrfToken;
-            this._state.refreshTimestamp = refreshTimestamp;
+            this.stateObj.oldCsrfToken = oldCsrfToken;
+            this.stateObj.refreshTimestamp = refreshTimestamp;
         }
 
-        return this._state.csrfToken;
+        return this.stateObj.csrfToken;
     }
 
     /**
@@ -87,31 +84,35 @@ class Session {
      * @returns String
      */
     get key() {
-        return Session.generateKey(this._id);
+        return Session.generateKey(this.idFromStateObj);
     }
 
     verifyCsrfToken(csrfToken) {
         // Old CSRF tokens are still valid for 5 mins.
         return (
             tokens.verify(csrfConfig.secret, csrfToken)
-                || (this._state.oldCsrfToken != null  && this._state.refreshTimestamp != null && this._state.oldCsrfToken === csrfToken && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp))
+                || (this.stateObj.oldCsrfToken != null
+                && this.stateObj.refreshTimestamp != null
+                && this.stateObj.oldCsrfToken === csrfToken
+                && moment().subtract(5, 'm').isSameOrBefore(this.stateObj.refreshTimestamp))
         );
     }
 
     get id() {
-        return this._id;
+        return this.idFromStateObj;
     }
 
-    static set id(id) {
+    static set id(id) {  // eslint-disable-line no-unused-vars
         throw e.throwServerError('Session ID is immutable.');
     }
 
     get csrfToken() {
-        return this._state.csrfToken;
+        return this.stateObj.csrfToken;
     }
 
-    set csrfToken(csrfToken) {
-        throw e.throwServerError('Unsupported! Please use the `session.generateCsrfToken()` method.');
+    set csrfToken(csrfToken) {  // eslint-disable-line no-unused-vars
+        throw e.throwServerError('Unsupported! ' +
+                                    'Please use the `session.generateCsrfToken()` method.');
     }
 
     get hasValidAccessToken() {
@@ -120,10 +121,10 @@ class Session {
     }
 
     get state() {
-        return _.cloneDeep(this._state);
+        return _.cloneDeep(this.stateObj);
     }
 
-    static set state(state) {
+    static set state(state) {  // eslint-disable-line no-unused-vars
         throw e.throwServerError('Session state is immutable.');
     }
 
@@ -132,13 +133,13 @@ class Session {
      * @param newState
      */
     updateState(state) {
-        _.merge(this._state, state);
+        _.merge(this.stateObj, state);
     }
 
     toString() {
-        var snapshot =  _.cloneDeep(this._state);
+        const snapshot = _.cloneDeep(this.stateObj);
 
-        snapshot.id = this._id;
+        snapshot.id = this.idFromStateObj;
 
         if (_.has(snapshot, 'refreshTimestamp')) {
             snapshot.refreshTimestamp = snapshot.refreshTimestamp.valueOf();

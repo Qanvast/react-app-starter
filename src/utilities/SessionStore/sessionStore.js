@@ -1,12 +1,8 @@
-'use strict';
-
 /**========================================
  * Packages
  ========================================**/
 import _ from 'lodash';
-import keyMirror from 'fbjs/lib/keyMirror';
 import redis from 'redis';
-import uuid from 'uuid';
 import validator from 'validator';
 
 import Session from './Session';
@@ -39,26 +35,27 @@ class SessionStore {
 
     createSession(state) {
         if (_.isPlainObject(state) || _.isEmpty(state)) {
-            let session = new Session(state);
+            const session = new Session(state);
 
             return new Promise((resolve, reject) => {
                 this
                     .client
-                    .set(session.key, session.toString(), 'NX', 'EX', this.options.session.maxAge, (error, response) => {
-                        if (!error) {
-                            if (response === 'OK') {
-                                resolve(session);
+                    .set(session.key, session.toString(), 'NX', 'EX',
+                        this.options.session.maxAge, (error, response) => {
+                            if (!error) {
+                                if (response === 'OK') {
+                                    resolve(session);
+                                } else {
+                                    reject(e.throwServerError('Session already exists.'));
+                                }
                             } else {
-                                reject(e.throwServerError('Session already exists.'));
+                                reject(error);
                             }
-                        } else {
-                            reject(error);
-                        }
-                    });
+                        });
             });
-        } else {
-            return Promise.reject(e.throwServerError('Invalid session state.'));
         }
+
+        return Promise.reject(e.throwServerError('Invalid session state.'));
     }
 
     /**
@@ -77,23 +74,22 @@ class SessionStore {
                         if (!error) {
                             if (sessionState != null) {
                                 try {
-                                    let session = new Session(sessionState);
+                                    const session = new Session(sessionState);
                                     resolve(session);
-                                } catch (error) {
-                                    reject(error);
+                                } catch (newError) {
+                                    reject(newError);
                                 }
                             } else {
                                 resolve(false);
                             }
-
                         } else {
                             reject(error);
                         }
                     });
             });
-        } else {
-            return Promise.reject(e.throwServerError('Invalid session ID.'));
         }
+
+        return Promise.reject(e.throwServerError('Invalid session ID.'));
     }
 
     /**
@@ -106,21 +102,22 @@ class SessionStore {
             return new Promise((resolve, reject) => {
                 this
                     .client
-                    .set(Session.generateKey(session.id), session.toString(), 'XX', 'EX', this.options.session.maxAge, (error, response) => {
-                        if (!error) {
-                            if (response === 'OK') {
-                                resolve(session);
+                    .set(Session.generateKey(session.id), session.toString(), 'XX', 'EX',
+                        this.options.session.maxAge, (error, response) => {
+                            if (!error) {
+                                if (response === 'OK') {
+                                    resolve(session);
+                                } else {
+                                    reject(e.throwServerError('Session does not exist.'));
+                                }
                             } else {
-                                reject(e.throwServerError('Session does not exist.'));
+                                reject(error);
                             }
-                        } else {
-                            reject(error);
-                        }
-                    });
+                        });
             });
-        } else {
-            return Promise.reject(e.throwServerError('Invalid session information.'));
         }
+
+        return Promise.reject(e.throwServerError('Invalid session information.'));
     }
 }
 

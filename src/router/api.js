@@ -1,5 +1,3 @@
-'use strict';
-
 /**========================================
  * Packages
  ========================================**/
@@ -14,17 +12,17 @@ import moment from 'moment';
 /**========================================
  * Utilities
  ========================================**/
-import e from 'qanvast-error';
+// import e from 'qanvast-error';
 
 /**========================================
  * Generate random users
  ========================================**/
-let generator = chance();
+const generator = chance();
 const MAX_USERS = 1000;
-let _users = [];
+const usersArray = [];
 
 for (let i = 0; i <= MAX_USERS; i++) {
-    _users.push({
+    usersArray.push({
         id: i,
         name: generator.name(),
         gender: generator.gender(),
@@ -36,34 +34,37 @@ for (let i = 0; i <= MAX_USERS; i++) {
     });
 }
 
-let api = Router();
+const api = Router(); // eslint-disable-line new-cap
 
 api.use(bodyParser.json());
 
 api.get('/users', (req, res) => {
-    let perPageCount = (req.query.per_page_count == null || req.query.per_page_count < 1) ? 10 : parseInt(req.query.per_page_count),
-        page = (req.query.page == null || req.query.page < 0) ? 1 : parseInt(req.query.page),
-        startIndex = (page - 1) * perPageCount,
-        endIndex = startIndex + perPageCount;
+    const perPageCount = (req.query.per_page_count == null || req.query.per_page_count < 1) ? 10 :
+                        parseInt(req.query.per_page_count, 10);
 
-    let users = _.slice(_users, startIndex, endIndex);
+    const page = (req.query.page == null || req.query.page < 0) ? 1 : parseInt(req.query.page, 10);
+
+    const startIndex = (page - 1) * perPageCount;
+    const endIndex = startIndex + perPageCount;
+    let users = _.slice(usersArray, startIndex, endIndex);
 
     users = users.map(user => {
         /**
-         * TODO: Odd numbered users will contain the whole object, while even numbered users will only contain ID and name.
+         * TODO: Odd numbered users will contain the whole object,
+         * TODO: while even numbered users will only contain ID and name.
          * TODO: Remove this if you're not trying to learn React.
          */
         if (user.id % 2 === 1) {
             return user;
-        } else {
-            return {id: user.id, name: user.name};
         }
+
+        return { id: user.id, name: user.name };
     });
 
-    let response = {
-        page: page,
+    const response = {
+        page,
         totalCount: MAX_USERS,
-        perPageCount: perPageCount,
+        perPageCount,
         data: users
     };
 
@@ -75,7 +76,7 @@ api.get('/user/:id', (req, res, next) => {
     if (req.headers && req.headers.authorization) {
         const parts = req.headers.authorization.split(' ');
 
-        if (parts.length == 2) {
+        if (parts.length === 2) {
             const scheme = parts[0];
             const credentials = parts[1];
 
@@ -89,47 +90,48 @@ api.get('/user/:id', (req, res, next) => {
 
     res.sendStatus(401); // Unauthorized.
 }, (req, res) => {
-    let id = req.params.id;
+    const id = req.params.id;
 
-    if (id == null || _users.length <= id) {
-        res.status(500).send({error: 'Invalid user'});
+    if (id == null || usersArray.length <= id) {
+        res.status(500).send({ error: 'Invalid user' });
     } else {
-        res.json(_users[id]);
+        res.json(usersArray[id]);
     }
 });
 
 // We're emulating a oauth2 connect/authentication flow here
-api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i, (req, res, next) => {
-    if (req.body.email && req.body.password) {
-        let expiryDate = moment().add(1, 'hours');
+api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i,
+    (req, res) => {
+        if (req.body.email && req.body.password) {
+            const expiryDate = moment().add(1, 'hours');
 
-        res.json({
-            user: {
-                email: req.body.email,
-                password: req.body.password
-            },
-            tokens: {
-                token: uuid.v4(),
-                expiry: expiryDate,
-                refreshToken: uuid.v4()
-            }
-        });
-    } else {
-        res.status(500).send({ error: 'Wrong email and password' })
-    }
-
-});
+            res.json({
+                user: {
+                    email: req.body.email,
+                    password: req.body.password
+                },
+                tokens: {
+                    token: uuid.v4(),
+                    expiry: expiryDate,
+                    refreshToken: uuid.v4()
+                }
+            });
+        } else {
+            res.status(500).send({ error: 'Wrong email and password' });
+        }
+    });
 
 // We're emulating a oauth2 refresh flow here
 api.post('/oauth2/token/refresh', (req, res) => {
-    if (req.body.tokens && req.body.tokens.refreshToken && validator.isUUID(req.body.tokens.refreshToken, '4')) {
+    if (req.body.tokens && req.body.tokens.refreshToken &&
+        validator.isUUID(req.body.tokens.refreshToken, '4')) {
         res.json({
             token: uuid.v4(),
             expiry: moment().add(1, 'hours'),
             refreshToken: uuid.v4()
         });
     } else {
-        res.status(400).send({error: 'Missing refresh token'});
+        res.status(400).send({ error: 'Missing refresh token' });
     }
 });
 

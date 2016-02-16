@@ -1,6 +1,5 @@
 // Libraries
 import _ from 'lodash';
-import async from 'async';
 import fetch from 'isomorphic-fetch';
 // import validator from 'validator';
 
@@ -17,7 +16,7 @@ class Proxy extends Base {
             const options = {
                 method: req.method,
                 headers: {
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                     'Content-Type': 'application/json'
                 }
             };
@@ -28,19 +27,21 @@ class Proxy extends Base {
             }
 
             return new Promise((resolve, reject) => {
-                fetch(`${this.constants.BASE_URL}/${req.originalUrl.split('/').splice(2).join('/')}`, options)
+                fetch(`${this.constants.BASE_URL}/${req.originalUrl.split('/')
+                    .splice(2).join('/')}`)
                     .then(response => {
                         if (response.status >= 200 && response.status < 300) {
-                            let parsedResponse = response.json();
+                            const parsedResponse = response.json();
 
                             resolve(parsedResponse.data);
                         } else {
-                            reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.'));
+                            reject(e.throwServerError(response.statusText ||
+                                                        'Unsuccessful HTTP response.'));
                         }
                     })
                     .catch(error => {
                         reject(e.throwServerError('Corrupted response.', error));
-                    })
+                    });
             });
         }
 
@@ -51,15 +52,15 @@ class Proxy extends Base {
 
     static refreshToken(refreshToken, userId) {
         if (__SERVER__) {
-            let options = {
+            const options = {
                 method: 'POST',
                 credentials: 'include',
                 body: JSON.stringify({
-                    refreshToken: refreshToken,
-                    userId: userId
+                    refreshToken,
+                    userId
                 }),
                 headers: {
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                     'Content-Type': 'application/json'
                 }
             };
@@ -68,7 +69,7 @@ class Proxy extends Base {
                 fetch(this.constants.BASE_URL + '/oauth2/token/refresh', options)
                     .then(response => {
                         if (response.status >= 200 && response.status < 300) {
-                            let parsedResponse = response.json();
+                            const parsedResponse = response.json();
 
                             if (_.has(parsedResponse.data, 'tokens.token')
                                 && _.has(parsedResponse.data, 'tokens.expiry')
@@ -78,10 +79,11 @@ class Proxy extends Base {
                                 reject(e.throwServerError('Corrupted response.'));
                             }
                         } else {
-                            reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.', error));
+                            reject(e.throwServerError(response.statusText ||
+                                                        'Unsuccessful HTTP response.'));
                         }
                     })
-                    .catch(function(error) {
+                    .catch(error => {
                         reject(error);
                     });
             });

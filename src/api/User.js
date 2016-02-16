@@ -1,5 +1,4 @@
 // Libraries
-import _ from 'lodash';
 import async from 'async';
 import http from 'superagent';
 // import validator from 'validator';
@@ -48,7 +47,7 @@ class User extends Base {
 
             headers['x-csrf-token'] = this.getCsrfToken();
 
-            console.log(`HEADERS: ${JSON.stringify(headers)}`);
+            // console.log(`HEADERS: ${JSON.stringify(headers)}`);
 
             return new Promise((resolve, reject) => {
                 async.waterfall([
@@ -71,7 +70,9 @@ class User extends Base {
                         // TODO: Otherwise, pass it back to the caller.
                         const response = result.body;
 
-                        if (response.page === page && response.perPageCount === perPageCount && response.data != null) {
+                        if (response.page === page &&
+                            response.perPageCount === perPageCount &&
+                            response.data != null) {
                             callback(null, response.data);
                         } else {
                             callback(new Error('Invalid response!'));

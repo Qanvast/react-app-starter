@@ -71,7 +71,8 @@ class UserStore {
             successCallback();
         }
 
-        return false; // We don't want to trigger the change event until the async operation completes.
+        // We don't want to trigger the change event until the async operation completes.
+        return false;
     }
 
     onGetUsers(payload) {
@@ -114,7 +115,8 @@ class UserStore {
             successCallback();
         }
 
-        return false; // We don't want to trigger the change event until the async operation completes.
+        // We don't want to trigger the change event until the async operation completes.
+        return false;
     }
 
     has(id, fields) {
@@ -140,16 +142,19 @@ class UserStore {
     }
 
     hasList(startIndex, count, fields) {
-        if (count == null && startIndex != null) {
-            count = startIndex;
-            startIndex = 0;
+        let listCount = count;
+        let listStartIndex = startIndex;
+
+        if (listCount == null && listStartIndex != null) {
+            listCount = listStartIndex;
+            listStartIndex = 0;
         }
 
-        if (startIndex >= 0 && count > 1) {
-            const lastIndex = startIndex + count;
+        if (listStartIndex >= 0 && listCount > 1) {
+            const lastIndex = listStartIndex + listCount;
             let listElementsExists = true;
 
-            for (let i = startIndex; i < lastIndex; ++i) {
+            for (let i = listStartIndex; i < lastIndex; ++i) {
                 const userId = this.userListOrder[i];
                 if (userId == null || !this.has(userId, fields)) {
                     listElementsExists = false;
@@ -175,16 +180,18 @@ class UserStore {
 
     getList(startIndex, count) {
         const state = this.getState();
+        let listCount = count;
+        let listStartIndex = startIndex;
 
-        if (count == null && startIndex != null) {
-            count = startIndex;
-            startIndex = 0;
+        if (listCount == null && listStartIndex != null) {
+            listCount = listStartIndex;
+            listStartIndex = 0;
         }
 
-        if (startIndex >= 0 && count > 1) {
-            const endIndex = startIndex + count;
+        if (listStartIndex >= 0 && listCount > 1) {
+            const endIndex = listStartIndex + listCount;
 
-            let userList = _.slice(state.userListOrder, startIndex, endIndex);
+            let userList = _.slice(state.userListOrder, listStartIndex, endIndex);
 
             userList = _.map(userList, function iterator(id) {
                 return this.users[id];
@@ -246,7 +253,9 @@ class UserStore {
     //         _.forEach(userList, function (user) {
     //             let clonedUser = _.cloneDeep(user);
     //
-    //             this.users[clonedUser.id] = clonedUser; // TODO We might want to do a merge here? In case the API returns data differently
+    //             // TODO We might want to do a merge here?
+    //             // TODO In case the API returns data differently
+    //             this.users[clonedUser.id] = clonedUser;
     //             this.userSortedListOrder[i] = clonedUser.id;
     //             ++i;
     //         }, this);

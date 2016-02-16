@@ -26,15 +26,18 @@ class AppStore {
             this.addPendingAlert({
                 type: 'error',
                 title: 'Oops!',
-                message: _.has(data, 'error.response.body.message') ? data.error.response.body.message : data.error.message,
-                error: _.has(data, 'error.response.body') ? data.error.response.body : undefined
+                message: _.has(data, 'error.response.body.message') ?
+                                data.error.response.body.message : data.error.message,
+                error: _.has(data, 'error.response.body') ?
+                                data.error.response.body : undefined
             });
         }
     }
 
     addPendingAlert(alert) {
         if (_.isObject(alert)
-            && (alert.type == null || /^((?:info)|(?:success)|(?:error)|(?:warning))$/i.test(alert.type))
+            && (alert.type == null ||
+                /^((?:info)|(?:success)|(?:error)|(?:warning))$/i.test(alert.type))
             && alert.message != null && alert.title != null) {
             const clonedAlert = _.cloneDeep(alert);
 
