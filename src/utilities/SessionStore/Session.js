@@ -1,3 +1,5 @@
+/* eslint-disable no-underscore-dangle */
+
 /**========================================
  * Packages
  ========================================**/
@@ -13,7 +15,7 @@ import Tokens from 'csrf';
 import e from 'qanvast-error';
 import csrfConfig from '../../configs/csrf';
 
-var tokens = new Tokens();
+const tokens = new Tokens();
 
 class Session {
     constructor(state) {
@@ -70,8 +72,8 @@ class Session {
      * Refreshes the session's CSRF token.
      */
     generateCsrfToken() {
-        let oldCsrfToken = this._state.csrfToken;
-        let refreshTimestamp = moment();
+        const oldCsrfToken = this._state.csrfToken;
+        const refreshTimestamp = moment();
 
         this._state.csrfToken = tokens.create(csrfConfig.secret);
 
@@ -87,7 +89,7 @@ class Session {
         // Old CSRF tokens are still valid for 5 mins.
         return (
             tokens.verify(csrfConfig.secret, csrfToken)
-            || (this._state.oldCsrfToken != null  && this._state.refreshTimestamp != null && this._state.oldCsrfToken === csrfToken && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp))
+            || (this._state.oldCsrfToken != null && this._state.refreshTimestamp != null && this._state.oldCsrfToken === csrfToken && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp))
         );
     }
 
@@ -103,7 +105,7 @@ class Session {
         return this._id;
     }
 
-    static set id(id) {
+    static set id(id) { // eslint-disable-line no-unused-vars
         throw e.throwServerError('Session ID is immutable.');
     }
 
@@ -119,7 +121,7 @@ class Session {
         return this._state.csrfToken;
     }
 
-    set csrfToken(csrfToken) {
+    set csrfToken(csrfToken) { // eslint-disable-line no-unused-vars
         throw e.throwServerError('Unsupported! Please use the `session.generateCsrfToken()` method.');
     }
 
@@ -127,7 +129,7 @@ class Session {
         return this._state.authorization.token;
     }
 
-    static set accessToken(token) {
+    static set accessToken(token) { // eslint-disable-line no-unused-vars
         throw e.throwServerError('Unsupported! Please use the `session.updateAccessToken()` method.');
     }
 
@@ -145,7 +147,7 @@ class Session {
         return this._state.authorization.refreshToken;
     }
 
-    static set refreshToken(token) {
+    static set refreshToken(token) { // eslint-disable-line no-unused-vars
         throw e.throwServerError('Unsupported! Please use the `session.updateAccessToken()` method.');
     }
 
@@ -159,20 +161,12 @@ class Session {
         return _.cloneDeep(this._state);
     }
 
-    static set state(state) {
+    static set state(state) { // eslint-disable-line no-unused-vars
         throw e.throwServerError('Session state is immutable.');
     }
 
-    /**
-     * Merges the new state with the existing state.
-     * @param newState
-     */
-    //updateState(state) {
-    //    _.merge(this._state, state);
-    //}
-
     toString() {
-        var snapshot =  _.cloneDeep(this._state);
+        const snapshot = _.cloneDeep(this._state);
 
         snapshot.id = this._id;
 
@@ -183,7 +177,6 @@ class Session {
         if (_.has(snapshot, 'refreshTimestamp')) {
             snapshot.refreshTimestamp = snapshot.refreshTimestamp.valueOf();
         }
-
 
         return JSON.stringify(snapshot);
     }

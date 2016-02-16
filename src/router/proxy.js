@@ -162,49 +162,49 @@ proxy.use((error, req, res, next) => { // eslint-disable-line no-unused-vars
  */
 export function sessionLoader(req, res, next) {
     switch (req.method) {
-    case 'GET':
-        let promise;
+        case 'GET':
+            let promise;
 
-        if (!req.signedCookies.sessionId
-            || _.isEmpty(req.signedCookies.sessionId)
-            || req.signedCookies.sessionId === 'undefined') {
-            // No valid session in cookie, so create new session.
-            promise = sessionStore.createSession();
-        } else {
-            // Retrieve session and check if its valid.
-            promise = sessionStore
-                .getSession(req.signedCookies.sessionId)
-                .then(existingSession => {
-                    if (existingSession === false) {
-                        // No existing session so we should create a new session.
-                        return sessionStore.createSession();
-                    }
+            if (!req.signedCookies.sessionId
+                || _.isEmpty(req.signedCookies.sessionId)
+                || req.signedCookies.sessionId === 'undefined') {
+                // No valid session in cookie, so create new session.
+                promise = sessionStore.createSession();
+            } else {
+                // Retrieve session and check if its valid.
+                promise = sessionStore
+                    .getSession(req.signedCookies.sessionId)
+                    .then(existingSession => {
+                        if (existingSession === false) {
+                            // No existing session so we should create a new session.
+                            return sessionStore.createSession();
+                        }
 
-                    return existingSession;
+                        return existingSession;
+                    });
+            }
+
+            promise
+                .then(session => {
+                    res.cookie(
+                        'sessionId',
+                        session.id,
+                        _.defaults({}, cookieConfig.defaultOptions)
+                    );
+                    res.cookie(
+                        'csrfToken',
+                        session.csrfToken,
+                        _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions)
+                    );
+                    next();
+                })
+                .catch(error => {
+                    next(error);
                 });
-        }
-
-        promise
-            .then(session => {
-                res.cookie(
-                    'sessionId',
-                    session.id,
-                    _.defaults({}, cookieConfig.defaultOptions)
-                );
-                res.cookie(
-                    'csrfToken',
-                    session.csrfToken,
-                    _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions)
-                );
-                next();
-            })
-            .catch(error => {
-                next(error);
-            });
-        break;
-    default:
-        next();
-        break;
+            break;
+        default:
+            next();
+            break;
     }
 }
 

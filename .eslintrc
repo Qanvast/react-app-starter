@@ -20,7 +20,7 @@
         // Code style
         "comma-dangle": [2, "never"],
         "eqeqeq": [2, "smart"],
-        "indent": [2, 4],
+        "indent": [2, 4, {"SwitchCase": 1}],
         "quotes": [2, "single", "avoid-escape"],
         "max-len": [1, 100, 4],
         "no-underscore-dangle": 1,

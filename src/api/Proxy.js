@@ -66,10 +66,11 @@ class Proxy extends Base {
 
             if (req.session == null || !req.session.hasRefreshToken) {
                 return Promise.reject(e.throwForbiddenError());
-            } else {
-                body.refreshToken = req.session.refreshToken;
-                // TODO Add user ID
             }
+
+            body.refreshToken = req.session.refreshToken;
+            // TODO Add user ID
+
 
             const options = {
                 method: 'POST',
@@ -86,11 +87,11 @@ class Proxy extends Base {
                     .then(response => {
                         if (response.status >= 200 && response.status < 300) {
                             return response.json();
-                        } else {
-                            reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.'));
-
-                            return false;
                         }
+
+                        reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.'));
+
+                        return false;
                     })
                     .then(data => {
                         if (data !== false) {
@@ -103,7 +104,7 @@ class Proxy extends Base {
                             }
                         }
                     })
-                    .catch(function(error) {
+                    .catch(error => {
                         reject(e.throwServerError('Corrupted response.', error));
                     });
             });
