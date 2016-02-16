@@ -67,6 +67,9 @@ proxy.post(
                         data.tokens.expiry,
                         data.tokens.refreshToken
                     );
+                    // TODO Set user ID based on API response.
+                    //req.session.setUserId(data.user.id);
+
                     req.session.generateCsrfToken();
 
                     return [data, sessionStore.updateSession(req.session)];
