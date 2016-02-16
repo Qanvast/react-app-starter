@@ -1,131 +1,211 @@
-'use strict';
-
 /**========================================
  * Packages
  ========================================**/
 import _ from 'lodash';
 import { Router } from 'express';
-import moment from 'moment';
-import http from 'superagent';
-import url from 'url';
 
 /**========================================
  * Utilities
  ========================================**/
-import e from '../utilities/e';
-import SessionStore from '../utilities/SessionStore';
+import e from 'qanvast-error';
+import { SessionStore } from '../utilities/SessionStore';
 import cookieConfig from '../configs/cookie';
-import GenericAPI from '../api/Generic';
+import ProxyAPI from '../api/Proxy';
 
-let proxy = Router();
-
+/**========================================
+ * Local variables
+ ========================================**/
+const proxy = Router(); // eslint-disable-line new-cap
 const sessionStore = new SessionStore();
-const ignoredMethods = ['GET', 'HEAD', 'OPTIONS'];
 
-
+// Verify CSRF token for all incoming requests.
 proxy.use((req, res, next) => {
-    if (_.indexOf(ignoredMethods, req.method.toUpperCase()) < 0) {
-        if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
-            // Retrieve session based on session ID and then get the CSRF token.
-            let csrfToken = req.get('x-csrf-token');
+    if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
+        let csrfToken = req.get('x-csrf-token');
 
-            if (_.isEmpty(csrfToken)) {
-                csrfToken = req.get('x-xsrf-token');
+        if (_.isEmpty(csrfToken)) {
+            csrfToken = req.get('x-xsrf-token');
+        }
+
+        if (_.isEmpty(csrfToken)) {
+            next(e.throwForbiddenError());
+        }
+
+        // Retrieve session based on session ID and then verify CSRF token.
+        sessionStore
+            .getSession(req.signedCookies.sessionId)
+            .then(session => {
+                if (session !== false && session.verifyCsrfToken(csrfToken)) {
+                    req.session = session; // eslint-disable-line no-param-reassign
+
+                    next();
+                } else {
+                    next(e.throwForbiddenError());
+                }
+            })
+            .catch(error => {
+                next(error);
+            });
+    } else {
+        next(e.throwForbiddenError());
+    }
+});
+
+// Forward connect requests to API.
+proxy.post(
+    /^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i,
+    (req, res, next) => {
+        ProxyAPI
+            .forward(req)
+            .then(data => {
+                if (_.has(data, 'tokens.token')
+                    && _.has(data, 'tokens.expiry')
+                    && _.has(data, 'tokens.refreshToken')) {
+                    // Update the state and generate a new CSRF token.
+                    req.session.updateAccessToken(
+                        data.tokens.token,
+                        data.tokens.expiry,
+                        data.tokens.refreshToken
+                    );
+                    req.session.generateCsrfToken();
+
+                    return [data, sessionStore.updateSession(req.session)];
+                }
+            })
+            .then((data, session) => {
+                // NEVER INCLUDE access tokens in the cookie for security reasons.
+                res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
+                res.cookie(
+                    'csrfToken',
+                    session.csrfToken,
+                    _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions)
+                );
+
+                const formattedData = _.cloneDeep(data);
+
+                if (_.has(formattedData, 'tokens')) {
+                    delete formattedData.tokens;
+                }
+
+                res.json(formattedData);
+            })
+            .catch(error => {
+                next(e.throwBadRequestError(error.message, error));
+            });
+    });
+
+// Forward standard requests to API.
+proxy.use((req, res, next) => {
+    let promise;
+
+    if (!req.session.hasValidAccessToken && req.session.hasRefreshToken) {
+        promise = ProxyAPI
+            .refreshToken(req)
+            .then((authorization) => {
+                // Update the state and generate a new CSRF token.
+                req.session.updateAccessToken(
+                    authorization.token,
+                    authorization.expiry,
+                    authorization.refreshToken
+                );
+                req.session.generateCsrfToken();
+
+                // Update the session in the session store.
+                return sessionStore.updateSession(req.session);
+            })
+            .then(() => {
+                return ProxyAPI.forward(req);
+            });
+    } else {
+        promise = ProxyAPI.forward(req);
+    }
+
+    promise
+        .then(data => {
+            res.cookie(
+                'sessionId',
+                req.session.id,
+                _.defaults({}, cookieConfig.defaultOptions)
+            );
+            res.cookie(
+                'csrfToken',
+                req.session.csrfToken,
+                _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions)
+            );
+
+            res.json(data);
+        })
+        .catch(error => {
+            next(error);
+        });
+});
+
+// Top level error handler.
+proxy.use((error, req, res, next) => { // eslint-disable-line no-unused-vars
+    const response = {
+        message: (error.message != null) ?
+            error.message : `Oops! This is embarrassing! Something went wrong!`,
+        error
+    };
+
+    res
+        .status(error.status || 500)
+        .send(response);
+});
+
+/**
+ * Middleware to load session based on cookie.
+ *
+ * @param req
+ * @param res
+ * @param next
+ */
+export function sessionLoader(req, res, next) {
+    switch (req.method) {
+        case 'GET':
+            let promise;
+
+            if (!req.signedCookies.sessionId
+                || _.isEmpty(req.signedCookies.sessionId)
+                || req.signedCookies.sessionId === 'undefined') {
+                // No valid session in cookie, so create new session.
+                promise = sessionStore.createSession();
+            } else {
+                // Retrieve session and check if its valid.
+                promise = sessionStore
+                    .getSession(req.signedCookies.sessionId)
+                    .then(existingSession => {
+                        if (existingSession === false) {
+                            // No existing session so we should create a new session.
+                            return sessionStore.createSession();
+                        }
+
+                        return existingSession;
+                    });
             }
 
-            if (_.isEmpty(csrfToken)) {
-                next(e.throwForbiddenError());
-            }
-
-            sessionStore
-                .getSession(req.signedCookies.sessionId)
+            promise
                 .then(session => {
-                    req.session = session;
-
-                    if (req.session.verifyCsrfToken(csrfToken)) {
-                        next();
-                    } else {
-                        next(e.throwForbiddenError());
-                    }
+                    res.cookie(
+                        'sessionId',
+                        session.id,
+                        _.defaults({}, cookieConfig.defaultOptions)
+                    );
+                    res.cookie(
+                        'csrfToken',
+                        session.csrfToken,
+                        _.defaults({ httpOnly: false, signed: false }, cookieConfig.defaultOptions)
+                    );
+                    next();
                 })
                 .catch(error => {
                     next(error);
                 });
-        } else {
-            next(e.throwForbiddenError());
-        }
-    } else {
-        next(); // Ignored method.
+            break;
+        default:
+            next();
+            break;
     }
-});
-
-proxy.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i, (req, res, next) => {
-    console.log(`Proxy received connect request.`);
-
-    /**
-     * 1.) Fire Request to API
-     * 2.) Parse Response
-     * 3.) If Success, go to 4; else go to 8
-     * 4.) If has success token, go to 5, else 7
-     * 5.) Strip response of tokens
-     * 6.) Prepare Cookie with new CSRF token and session ID
-     * 7.) Return response with Cookie
-     * 8.) Return error response with cookie
-     */
-
-    GenericAPI.sendRequestToApi(req, (err, response) => {
-        if (err) { return res.status(500).send({error: "Server error"}); }
-        let sessionState = {
-            csrfToken: 'asdsadsadas12321ewdas'
-        };
-        sessionState.accessToken = response.data.accessToken ? response.data.accessToken : undefined;
-        sessionStore.createSession(sessionState)
-            .then(session => {
-                res.cookies('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
-                res.cookies('csrfToken', session.csrfToken, _.defaults({}, cookieConfig.defaultOptions));
-                res.json(session); //return back the session cookie (contains sessionId, csrfToken, and optionally accessToken);
-            })
-            .catch(error => {
-                res.status(500).send({error: error.message});
-            });
-    });
-
-});
-
-proxy.use('*', (req, res, next) => {
-    // TODO Retrieve API access tokens from `req.session`.
-    /**
-     * 1.) Get API Access Token
-     * 2.) If Token Valid: go to 3; else 7
-     * 3.) Fire Request to API
-     * 4.) Parse Response
-     * 5.) If response is successfull && session refreshed: prepare cookie with new CSRF token and session ID; else go to 9
-     * 6.) Send refresh request
-     * 7.) if Refresh successful: go to 8; else 9
-     * 8.) replace stored tokens with refreshed tokens n go to 3
-     * 9.) return error response with cookie
-     */
-    // TODO: complete check valid token algorithm (Step 2)
-    let isAccessTokenValid = (token) => {
-        return token ? true : false;
-    };
-    // TODO: complete refreshing the expired/invalid token (Step 8)
-    let refreshAccessToken = (oldtoken) => {
-        let refreshedToken = "asdasd";
-        return refreshedToken;
-    };
-    let accessToken = req.get("Authorization") ? req.get("Authorization") : null;
-    if (  !accessToken || (accessToken && !isAccessTokenValid(accessToken))  ) {
-        // if no access token, or has invalid token
-        return res.status(500).send({error: "Missing access token in request header"});
-    } else {
-        // API Token is Valid
-        GenericAPI.sendRequestToApi(req, function(err, response){
-            if (err && !response) { return res.status(500).send({error: err.message}); }
-            return res.json(response);
-        });
-    }
-
-});
+}
 
 export default proxy;

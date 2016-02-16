@@ -1,5 +1,3 @@
-'use strict';
-
 export default {
     options: {},
     mode: process.env.CORS_MODE || 'relaxed', // You can do either strict or relaxed.
