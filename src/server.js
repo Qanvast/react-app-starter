@@ -16,13 +16,6 @@ import path from 'path';
 import favicon from 'serve-favicon';
 import logger from 'morgan';
 
-// import _ from 'lodash';
-
-/**
- * Utilities
- */
-// import e from 'qanvast-error';
-
 /**
  * Configs
  */
