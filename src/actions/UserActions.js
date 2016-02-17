@@ -44,6 +44,23 @@ class UserActions {
 
         this.dispatch(payload);
     }
+
+    loginUser(parameters) {
+        const { email, password, callback } = parameters;
+
+        const payload = {
+            email,
+            password,
+            getData: UserAPI.login(email, password),
+            onError: error => {
+                // TODO: You can add in hooks here to do something when an error occurs.
+                AppActions.showAlert({ error });
+            },
+            onFinish: (callback != null && _.isFunction(callback)) ? callback : undefined
+        };
+
+        this.dispatch(payload);
+    }
 }
 
 export default alt.createActions(UserActions);
