@@ -11,6 +11,7 @@ import e from 'qanvast-error';
 import { SessionStore } from '../utilities/SessionStore';
 import cookieConfig from '../configs/cookie';
 import ProxyAPI from '../api/Proxy';
+import bodyParser from 'body-parser';
 
 /**========================================
  * Local variables
@@ -18,8 +19,11 @@ import ProxyAPI from '../api/Proxy';
 const proxy = Router(); // eslint-disable-line new-cap
 const sessionStore = new SessionStore();
 
+proxy.use(bodyParser.json());
+
 // Verify CSRF token for all incoming requests.
 proxy.use((req, res, next) => {
+
     if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
         let csrfToken = req.get('x-csrf-token');
 
@@ -67,15 +71,20 @@ proxy.post(
                         data.tokens.expiry,
                         data.tokens.refreshToken
                     );
-                    // TODO Set user ID based on API response.
-                    //req.session.setUserId(data.user.id);
+
+                    if (data.user && data.user.id) {
+                        req.session.setUserId(data.user.id);
+                    }
 
                     req.session.generateCsrfToken();
 
-                    return [data, sessionStore.updateSession(req.session)];
+                    return Promise.all([data, sessionStore.updateSession(req.session)]);
                 }
             })
-            .then((data, session) => {
+            .then(result => {
+                let data = result[0];
+                let session = result[1];
+
                 // NEVER INCLUDE access tokens in the cookie for security reasons.
                 res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));
                 res.cookie(

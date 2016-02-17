@@ -101,6 +101,14 @@ class Session {
         };
     }
 
+    setUserId(userid) {
+        this._state.userId = userid;
+    }
+
+    get userId() {
+        return this._state.userId;
+    }
+
     get id() {
         return this._id;
     }
@@ -170,12 +178,12 @@ class Session {
 
         snapshot.id = this._id;
 
-        if (_.has(snapshot, 'authorization.expiry')) {
-            snapshot.authorization.expiry = snapshot.authorization.expiry.valueOf();
+        if (_.has(this._state, 'authorization.expiry')) {
+            snapshot.authorization.expiry = this._state.authorization.expiry.valueOf();
         }
 
-        if (_.has(snapshot, 'refreshTimestamp')) {
-            snapshot.refreshTimestamp = snapshot.refreshTimestamp.valueOf();
+        if (_.has(this._state, 'refreshTimestamp')) {
+            snapshot.refreshTimestamp = this._state.refreshTimestamp.valueOf();
         }
 
         return JSON.stringify(snapshot);

@@ -69,8 +69,8 @@ class Proxy extends Base {
             }
 
             body.refreshToken = req.session.refreshToken;
-            // TODO Add user ID
-            // body.userId = req.session.userId;
+            //Include userId to request body, as backend API needed this info
+            body.userId = req.session.userId;
 
             const options = {
                 method: 'POST',

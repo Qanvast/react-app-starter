@@ -99,17 +99,14 @@ api.get('/user/:id', (req, res, next) => {
     }
 });
 
-// We're emulating a oauth2 connect/authentication flow here
+// We're emulating a oauth2 connect/authentication flow here, will always return User 1
 api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-password)\/?$/i,
     (req, res) => {
         if (req.body.email && req.body.password) {
             const expiryDate = moment().add(1, 'hours');
 
             res.json({
-                user: {
-                    email: req.body.email,
-                    password: req.body.password
-                },
+                user: usersArray[1],
                 tokens: {
                     token: uuid.v4(),
                     expiry: expiryDate,
@@ -123,13 +120,19 @@ api.post(/^\/authentication\/(connect\/[a-z0-9]+(?:-[a-z0-9]+)?|register|reset-p
 
 // We're emulating a oauth2 refresh flow here
 api.post('/oauth2/token/refresh', (req, res) => {
-    if (req.body.tokens && req.body.tokens.refreshToken &&
-        validator.isUUID(req.body.tokens.refreshToken, '4')) {
+    if (req.body.tokens
+        && req.body.tokens.refreshToken
+        && validator.isUUID(req.body.tokens.refreshToken, '4')
+        && req.body.userId) {
+
+        console.log('refresh Token is called in api with req.body', req.body);
+
         res.json({
             token: uuid.v4(),
             expiry: moment().add(1, 'hours'),
             refreshToken: uuid.v4()
         });
+
     } else {
         res.status(400).send({ error: 'Missing refresh token' });
     }
