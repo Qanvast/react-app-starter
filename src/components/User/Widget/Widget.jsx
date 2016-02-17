@@ -115,7 +115,7 @@ class Widget extends React.Component {
 
         const panelHeader = (<h3>{this.state.user.name} (ID : {this.state.user.id})</h3>);
         const panelFooter = (
-            <Button bsStyle='info' onClick={() => {this.context.history.pushState(null, `/user/${parseInt(this.state.user.id)}`);}}>
+            <Button bsStyle='info' onClick={() => {this.context.router.push(`/user/${parseInt(this.state.user.id)}`);}}>
                 Full Details
             </Button>
         );
@@ -127,8 +127,7 @@ class Widget extends React.Component {
 }
 
 Widget.contextTypes = {
-    history: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    router: React.PropTypes.object.isRequired
 };
 
 Widget.propTypes = {

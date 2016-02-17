@@ -92,5 +92,5 @@ app.set('port', port);
  * Create HTTP server.
  */
 const server = app.listen(app.get('port'), () => {
-    debug('Express server listening on port ' + server.address().port);
+    debug(`Express server listening on port ${server.address().port}`);
 });

@@ -103,7 +103,7 @@ class Home extends React.Component {
         };
 
         this.loadPage = (page) => {
-            this.context.history.pushState(null, `/${page}`);
+            this.context.router.push(`/${page}`);
         };
     }
 
@@ -204,8 +204,7 @@ class Home extends React.Component {
 }
 
 Home.contextTypes = {
-    history: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    router: React.PropTypes.object.isRequired
 };
 
 export default Home;
