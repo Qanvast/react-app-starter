@@ -48,7 +48,7 @@ class User extends Base {
         return () => {
             const headers = {};
 
-            headers['x-csrf-token'] = this.getCsrfToken();
+            headers[`x-csrf-token`] = this.getCsrfToken();
 
             return new Promise((resolve, reject) => {
                 async.waterfall([

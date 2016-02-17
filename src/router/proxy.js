@@ -71,7 +71,6 @@ proxy.post(
                         data.tokens.expiry,
                         data.tokens.refreshToken
                     );
-
                     if (data.user && data.user.id) {
                         req.session.setUserId(data.user.id);
                     }
@@ -125,9 +124,7 @@ proxy.use((req, res, next) => {
                 // Update the session in the session store.
                 return sessionStore.updateSession(req.session);
             })
-            .then(() => {
-                return ProxyAPI.forward(req);
-            });
+            .then(() => ProxyAPI.forward(req));
     } else {
         promise = ProxyAPI.forward(req);
     }

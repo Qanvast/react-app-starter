@@ -20,8 +20,7 @@ import cookieConfig from '../configs/cookie';
 import React from 'react';
 import { render } from 'react-dom';
 import { renderToString } from 'react-dom/server';
-import { Router, match, RouterContext } from 'react-router';
-import { createHistory } from 'history';
+import { Router, match, RouterContext, browserHistory } from 'react-router';
 
 /*=================================
  Google Analytics
@@ -98,7 +97,7 @@ class AppRouter {
 
         render(
             <Router
-                history={createHistory()}
+                history={browserHistory}
                 routes={routes}
                 onUpdate={onUpdate}
             />,
