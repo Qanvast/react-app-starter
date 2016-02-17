@@ -11,12 +11,27 @@ import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import GoogleAnalytics from 'react-ga';
 import List from '../Widgets/List';
 
+// Actions
+import UserActions from '../../actions/UserActions';
+
 // Stores
 import AppStore from '../../stores/AppStore';
 
 class App extends React.Component {
     constructor(props, context) {
         super(props, context); // NOTE: IntelliJ lints this as invalid. Ignore warning.
+
+
+        this.onTestLoginBtnClicked = () => {
+            //FOR TESTING ONLY
+            let parameters = {
+                email: 'test@email.com',
+                password: 'password'
+            };
+
+            UserActions.loginUser(parameters);
+        };
+
     }
 
     componentDidMount() {
@@ -41,6 +56,7 @@ class App extends React.Component {
                     </Navbar.Header>
                     <Nav pullRight>
                       <NavItem eventKey={1} href='http://stevetan.me'>Blog</NavItem>
+                        <NavItem onClick={this.onTestLoginBtnClicked}>Login</NavItem>
                     </Nav>
                 </Navbar>
                 <main className='container-fluid'>

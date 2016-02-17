@@ -102,16 +102,6 @@ class Home extends React.Component {
             this.loadPage(page);
         };
 
-        this.onTestLoginBtnClicked = () => {
-            //FOR TESTING ONLY
-            let parameters = {
-                email: 'test@email.com',
-                password: 'password'
-            };
-
-            UserActions.loginUser(parameters);
-        };
-
         this.loadPage = (page) => {
             this.context.router.push(`/${page}`);
         };
@@ -147,7 +137,6 @@ class Home extends React.Component {
                 <Button bsStyle='info' onClick={this.onNextButtonClicked}>
                     Next &#8594;
                 </Button>
-                <Button bsStyle='primary' onClick={this.onTestLoginBtnClicked}>Test Login</Button>
             </ButtonGroup>
 
         );

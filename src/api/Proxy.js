@@ -9,6 +9,7 @@ import e from 'qanvast-error';
 import Base from './Base';
 
 const methodsWithBody = ['POST', 'PUT', 'PATCH', 'DELETE'];
+const defaultServerErrorMessage = 'Unsuccessful HTTP response.';
 
 class Proxy extends Base {
     static forward(req) {
@@ -35,12 +36,12 @@ class Proxy extends Base {
                 const reqUrl = `${this.constants.BASE_URL}/${reqPath}`;
 
                 fetch(reqUrl, options)
-                    .then(response => {
-                        if (response.status >= 200 && response.status < 300) {
-                            return response.json();
+                    .then(resp => {
+                        if (resp.status >= 200 && resp.status < 300) {
+                            return resp.json();
                         }
 
-                        reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.'));
+                        reject(e.throwServerError(resp.statusText || defaultServerErrorMessage));
 
                         return false;
                     })
@@ -69,7 +70,7 @@ class Proxy extends Base {
             }
 
             body.refreshToken = req.session.refreshToken;
-            //Include userId to request body, as backend API needed this info
+            // Include userId to request body, as backend API needed this info
             body.userId = req.session.userId;
 
             const options = {
@@ -84,12 +85,12 @@ class Proxy extends Base {
 
             return new Promise((resolve, reject) => {
                 fetch(this.constants.BASE_URL + '/oauth2/token/refresh', options)
-                    .then(response => {
-                        if (response.status >= 200 && response.status < 300) {
-                            return response.json();
+                    .then(resp => {
+                        if (resp.status >= 200 && resp.status < 300) {
+                            return resp.json();
                         }
 
-                        reject(e.throwServerError(response.statusText || 'Unsuccessful HTTP response.'));
+                        reject(e.throwServerError(resp.statusText || defaultServerErrorMessage));
 
                         return false;
                     })

@@ -88,8 +88,12 @@ class Session {
     verifyCsrfToken(csrfToken) {
         // Old CSRF tokens are still valid for 5 mins.
         return (
-            tokens.verify(csrfConfig.secret, csrfToken)
-            || (this._state.oldCsrfToken != null && this._state.refreshTimestamp != null && this._state.oldCsrfToken === csrfToken && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp))
+            tokens.verify(csrfConfig.secret, csrfToken) || (
+                this._state.oldCsrfToken != null
+                && this._state.refreshTimestamp != null
+                && this._state.oldCsrfToken === csrfToken
+                && moment().subtract(5, 'm').isSameOrBefore(this._state.refreshTimestamp)
+            )
         );
     }
 
@@ -130,7 +134,7 @@ class Session {
     }
 
     set csrfToken(csrfToken) { // eslint-disable-line no-unused-vars
-        throw e.throwServerError('Unsupported! Please use the `session.generateCsrfToken()` method.');
+        throw e.throwServerError('Unsupported! Use the `session.generateCsrfToken()` method.');
     }
 
     get accessToken() {
@@ -138,7 +142,7 @@ class Session {
     }
 
     static set accessToken(token) { // eslint-disable-line no-unused-vars
-        throw e.throwServerError('Unsupported! Please use the `session.updateAccessToken()` method.');
+        throw e.throwServerError('Unsupported! Use the `session.updateAccessToken()` method.');
     }
 
     get hasValidAccessToken() {
@@ -156,7 +160,7 @@ class Session {
     }
 
     static set refreshToken(token) { // eslint-disable-line no-unused-vars
-        throw e.throwServerError('Unsupported! Please use the `session.updateAccessToken()` method.');
+        throw e.throwServerError('Unsupported! Use the `session.updateAccessToken()` method.');
     }
 
     get hasRefreshToken() {

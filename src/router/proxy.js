@@ -23,7 +23,6 @@ proxy.use(bodyParser.json());
 
 // Verify CSRF token for all incoming requests.
 proxy.use((req, res, next) => {
-
     if (!_.isEmpty(req.signedCookies) && !_.isEmpty(req.signedCookies.sessionId)) {
         let csrfToken = req.get('x-csrf-token');
 
@@ -81,8 +80,8 @@ proxy.post(
                 }
             })
             .then(result => {
-                let data = result[0];
-                let session = result[1];
+                const data = result[0];
+                const session = result[1];
 
                 // NEVER INCLUDE access tokens in the cookie for security reasons.
                 res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));

@@ -43,7 +43,6 @@ class UserStore {
             } = payload;
 
         const successCallback = data => {
-
             if (data.user != null) {
                 this.set(data.user);
             }

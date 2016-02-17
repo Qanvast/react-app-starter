@@ -10,21 +10,21 @@ class User extends Base {
 
     static login(email, password) {
         return () => {
-            const headers = {};
-            headers['Accept'] = 'application/json';
+            const headers = {
+                Accept: 'application/json'
+            };
             headers['Content-Type'] = 'application/json';
             headers['x-csrf-token'] = this.getCsrfToken();
 
             return new Promise((resolve, reject) => {
                 async.waterfall([
                     callback => {
-
                         http
                             .post('/authentication/connect/local/')
                             .use(this.constants.URL_PREFIX)
                             .set(headers)
                             .type('json')
-                            .send({ email: email, password: password })
+                            .send({ email, password })
                             .withCredentials()
                             .timeout(this.constants.TIMEOUT_MS)
                             .end(callback);
@@ -41,7 +41,7 @@ class User extends Base {
                     }
                 });
             });
-        }
+        };
     }
 
     static get(id) {
