@@ -1,5 +1,3 @@
-'use strict';
-
 export default {
     googleAnalytics: {
         appId: 'UA-xxxxxxxx-x'

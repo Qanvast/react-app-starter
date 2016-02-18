@@ -6,7 +6,9 @@
     },
     "globals": {
         "__DEV__": true,
-        "__SERVER__": true
+        "__CLIENT__": true,
+        "__SERVER__": true,
+        "__DEVTOOLS__": true
     },
     "extends": [
         "airbnb"
@@ -18,10 +20,15 @@
         // Code style
         "comma-dangle": [2, "never"],
         "eqeqeq": [2, "smart"],
-        "indent": [2, 4],
+        "indent": [2, 4, {"SwitchCase": 1}],
         "quotes": [2, "single", "avoid-escape"],
+        "max-len": [1, 100, 4],
         "no-underscore-dangle": 1,
         "no-unused-vars": 1,
+        "spaced-comment": [2, "always", {
+            "exceptions": ["-", "+", "="],
+            "markers": ["=", "!"]           // space here to support sprockets directives
+        }],
 
         // Node.js specific
         "handle-callback-err": [1, "^(err|error)$"],

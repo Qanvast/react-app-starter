@@ -5,10 +5,10 @@ import React from 'react';
 
 // Libraries
 import _ from 'lodash';
-//import {RouteHandler} from 'react-router';
+//import { RouteHandler } from 'react-router';
 
 // Components
-import {Button, ButtonGroup, Panel} from 'react-bootstrap';
+import { Button, ButtonGroup, Panel } from 'react-bootstrap';
 import List from '../Widgets/List';
 import UserWidget from '../User/Widget';
 
@@ -103,7 +103,7 @@ class Home extends React.Component {
         };
 
         this.loadPage = (page) => {
-            this.context.history.pushState(null, `/${page}`);
+            this.context.router.push(`/${page}`);
         };
     }
 
@@ -138,6 +138,7 @@ class Home extends React.Component {
                     Next &#8594;
                 </Button>
             </ButtonGroup>
+
         );
 
         return (
@@ -149,7 +150,7 @@ class Home extends React.Component {
      * Static method to trigger data actions for server-side rendering.
      *
      * @param routerState
-     * @returns {*}
+     * @param callback
      */
     static fetchData(routerState, callback) {
         let state = getInitialState();
@@ -204,8 +205,7 @@ class Home extends React.Component {
 }
 
 Home.contextTypes = {
-    history: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    router: React.PropTypes.object.isRequired
 };
 
 export default Home;

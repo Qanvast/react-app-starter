@@ -6,14 +6,14 @@ import React from 'react';
 // Libraries
 import _ from 'lodash';
 import assign from 'object-assign';
-import {Link} from 'react-router';
+import { Link } from 'react-router';
 
 // Actions
 import AppActions from '../../../actions/AppActions';
 import UserActions from '../../../actions/UserActions';
 
 // Components
-import {Button, ButtonGroup, Panel} from 'react-bootstrap';
+import { Button, ButtonGroup, Panel } from 'react-bootstrap';
 
 // Stores
 import UserStore from '../../../stores/UserStore';
@@ -106,13 +106,13 @@ class Details extends React.Component {
         const panelHeader = (<h3>{this.state.user.name} (ID : {this.state.user.id})</h3>);
         const panelFooter = (
             <ButtonGroup>
-                <Button bsStyle='info' onClick={() => {this.context.history.pushState(null, `/user/${parseInt(this.state.user.id) + 1}`);}}>
+                <Button bsStyle='info' onClick={() => {this.context.router.push(`/user/${parseInt(this.state.user.id) + 1}`);}}>
                     Next User
                 </Button>
-                <Button bsStyle='warning' onClick={() => {this.context.history.goBack();}}>
+                <Button bsStyle='warning' onClick={() => {this.context.router.goBack();}}>
                     Back
                 </Button>
-                <Button bsStyle='danger' onClick={() => {this.context.history.pushState(null, `/`);}}>
+                <Button bsStyle='danger' onClick={() => {this.context.router.push(`/`);}}>
                     Home
                 </Button>
             </ButtonGroup>
@@ -145,7 +145,7 @@ class Details extends React.Component {
      * Static method to trigger data actions for server-side rendering.
      *
      * @param routerState
-     * @returns {*}
+     * @param callback
      */
     static fetchData(routerState, callback) {
         let state = getInitialState();
@@ -186,8 +186,7 @@ class Details extends React.Component {
 }
 
 Details.contextTypes = {
-    history: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    router: React.PropTypes.object.isRequired
 };
 
 export default Details;

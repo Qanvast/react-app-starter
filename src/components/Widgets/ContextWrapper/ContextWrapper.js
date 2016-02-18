@@ -1,5 +1,3 @@
-'use strict';
-
 import React from 'react';
 
 /**
@@ -14,13 +12,11 @@ class ContextWrapper extends React.Component {
 }
 
 ContextWrapper.contextTypes = {
-    history: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    router: React.PropTypes.object.isRequired
 };
 
 ContextWrapper.childContextTypes = {
-    history: React.PropTypes.object.isRequired,
-    location: React.PropTypes.object.isRequired
+    router: React.PropTypes.object.isRequired
 };
 
 export default ContextWrapper;

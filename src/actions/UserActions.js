@@ -1,5 +1,3 @@
-'use strict';
-
 // Libraries
 import _ from 'lodash';
 
@@ -14,14 +12,14 @@ import UserAPI from '../api/User';
 
 class UserActions {
     getUser(parameters) {
-        let { id, fields, callback } = parameters;
+        const { id, fields, callback } = parameters;
 
-        let payload = {
+        const payload = {
             id,
             fields,
             getData: UserAPI.get(id),
             onError: error => {
-                AppActions.showAlert({error});
+                AppActions.showAlert({ error });
             },
             onFinish: (callback != null && _.isFunction(callback)) ? callback : undefined
         };
@@ -30,16 +28,33 @@ class UserActions {
     }
 
     getUsers(parameters) {
-        let { page, perPageCount, fields, callback } = parameters;
+        const { page, perPageCount, fields, callback } = parameters;
 
-        let payload = {
+        const payload = {
             page,
             perPageCount,
             fields,
             getData: UserAPI.getPage(page, perPageCount),
             onError: error => {
                 // TODO: You can add in hooks here to do something when an error occurs.
-                AppActions.showAlert({error});
+                AppActions.showAlert({ error });
+            },
+            onFinish: (callback != null && _.isFunction(callback)) ? callback : undefined
+        };
+
+        this.dispatch(payload);
+    }
+
+    loginUser(parameters) {
+        const { email, password, callback } = parameters;
+
+        const payload = {
+            email,
+            password,
+            getData: UserAPI.login(email, password),
+            onError: error => {
+                // TODO: You can add in hooks here to do something when an error occurs.
+                AppActions.showAlert({ error });
             },
             onFinish: (callback != null && _.isFunction(callback)) ? callback : undefined
         };

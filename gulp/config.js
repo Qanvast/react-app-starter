@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var webpack = require('webpack');
 
 var dest = "./public";
 var src = "./src";
@@ -56,7 +57,14 @@ module.exports = {
         clientOptions: _.merge({
             entry: {
                 app: src + "/app.js"
-            }
+            },
+            plugins: [
+                new webpack.DefinePlugin({
+                    __CLIENT__: true,
+                    __SERVER__: false,
+                    __DEVELOPMENT__: false
+                })
+            ]
         }, webpackConfig),
         serverOptions: _.merge({
             entry: {
@@ -74,7 +82,14 @@ module.exports = {
                 Buffer: false,
                 __filename: false,
                 __dirname: false
-            }
+            },
+            plugins: [
+                new webpack.DefinePlugin({
+                    __CLIENT__: false,
+                    __SERVER__: true,
+                    __DEVELOPMENT__: false
+                })
+            ]
         }, webpackConfig)
     },
     templates: {

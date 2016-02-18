@@ -1,28 +1,30 @@
-'use strict';
 
 // Core
 import alt from '../alt';
-import EventEmitter from 'eventemitter3';
+// import EventEmitter from 'eventemitter3';
 
 // Actions
 import UserActions from '../actions/UserActions';
 
 // Dependent Stores
-import AppStore from './AppStore';
+// import AppStore from './AppStore';
 
 // Libraries
 import _ from 'lodash';
-import assign from 'object-assign';
+// import assign from 'object-assign';
 import objectHasKey from '../utilities/objectHasKey';
 
 class UserStore {
-    constructor () {
+    constructor() {
         this.users = {};
-        this.userListOrder = []; // TODO: If user list is to be filtered, we can have a new order array. e.g. userSortedListOrder or userFilteredListOrder
-        this.userSortedListOrder = [];
+        // TODO If user list is to be filtered, we can have a new order array.
+        // TODO e.g. userSortedListOrder or userFilteredListOrder
+        this.userListOrder = [];
+        // this.userSortedListOrder = [];
 
         this.bindAction(UserActions.getUser, this.onGetUser);
         this.bindAction(UserActions.getUsers, this.onGetUsers);
+        this.bindAction(UserActions.loginUser, this.onLoginUser);
 
         this.exportPublicMethods({
             get: this.get,
@@ -31,8 +33,46 @@ class UserStore {
         });
     }
 
+    onLoginUser(payload) {
+        const {
+            email,
+            password,
+            getData,
+            onError,
+            onFinish
+            } = payload;
+
+        const successCallback = data => {
+            if (data.user != null) {
+                this.set(data.user);
+            }
+
+            if (onFinish != null && _.isFunction(onFinish)) {
+                onFinish();
+            }
+
+            this.emitChange();
+        };
+
+        const errorCallback = error => {
+            if (onError != null && _.isFunction(onError)) {
+                onError(error);
+            }
+
+            if (onFinish != null && _.isFunction(onFinish)) {
+                onFinish(error);
+            }
+        };
+
+        getData(email, password)
+            .then(successCallback)
+            .catch(errorCallback);
+
+        return false;
+    }
+
     onGetUser(payload) {
-        let {
+        const {
             id,
             fields,
             getData,
@@ -40,7 +80,7 @@ class UserStore {
             onFinish
         } = payload;
 
-        let successCallback = user => {
+        const successCallback = user => {
             if (user != null) {
                 this.set(user);
             }
@@ -52,7 +92,7 @@ class UserStore {
             this.emitChange();
         };
 
-        let errorCallback = error => {
+        const errorCallback = error => {
             if (onError != null && _.isFunction(onError)) {
                 onError(error);
             }
@@ -70,11 +110,12 @@ class UserStore {
             successCallback();
         }
 
-        return false; // We don't want to trigger the change event until the async operation completes.
+        // We don't want to trigger the change event until the async operation completes.
+        return false;
     }
 
     onGetUsers(payload) {
-        let {
+        const {
             page,
             perPageCount,
             fields,
@@ -83,7 +124,7 @@ class UserStore {
             onFinish
         } = payload;
 
-        let successCallback = users => {
+        const successCallback = users => {
             if (users != null) {
                 this.setList(users, (page - 1) * perPageCount);
             }
@@ -95,7 +136,7 @@ class UserStore {
             this.emitChange();
         };
 
-        let errorCallback = error => {
+        const errorCallback = error => {
             if (onError != null && _.isFunction(onError)) {
                 onError(error);
             }
@@ -113,16 +154,17 @@ class UserStore {
             successCallback();
         }
 
-        return false; // We don't want to trigger the change event until the async operation completes.
+        // We don't want to trigger the change event until the async operation completes.
+        return false;
     }
 
     has(id, fields) {
-        let user = this.users[id];
+        const user = this.users[id];
 
         if (user != null) {
             if (_.isArray(fields)) {
                 let hasAllRequiredFields = true;
-                for (let field of fields) {
+                for (const field of fields) {
                     if (!objectHasKey(user, field)) {
                         hasAllRequiredFields = false;
                         break;
@@ -130,26 +172,29 @@ class UserStore {
                 }
 
                 return hasAllRequiredFields;
-            } else {
-                return true;
             }
-        } else {
-            return false;
+
+            return true;
         }
+
+        return false;
     }
 
     hasList(startIndex, count, fields) {
-        if (count == null && startIndex != null) {
-            count = startIndex;
-            startIndex = 0;
+        let listCount = count;
+        let listStartIndex = startIndex;
+
+        if (listCount == null && listStartIndex != null) {
+            listCount = listStartIndex;
+            listStartIndex = 0;
         }
 
-        if (startIndex >= 0 && count > 1) {
-            let lastIndex = startIndex + count,
-                listElementsExists = true;
+        if (listStartIndex >= 0 && listCount > 1) {
+            const lastIndex = listStartIndex + listCount;
+            let listElementsExists = true;
 
-            for (let i = startIndex; i < lastIndex; ++i) {
-                let userId = this.userListOrder[i];
+            for (let i = listStartIndex; i < lastIndex; ++i) {
+                const userId = this.userListOrder[i];
                 if (userId == null || !this.has(userId, fields)) {
                     listElementsExists = false;
                     break;
@@ -157,9 +202,9 @@ class UserStore {
             }
 
             return listElementsExists;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     hasPage(page, count, fields) {
@@ -167,32 +212,34 @@ class UserStore {
     }
 
     get(id) {
-        let state = this.getState();
+        const state = this.getState();
 
         return state.users[id];
     }
 
     getList(startIndex, count) {
-        let state = this.getState();
+        const state = this.getState();
+        let listCount = count;
+        let listStartIndex = startIndex;
 
-        if (count == null && startIndex != null) {
-            count = startIndex;
-            startIndex = 0;
+        if (listCount == null && listStartIndex != null) {
+            listCount = listStartIndex;
+            listStartIndex = 0;
         }
 
-        if (startIndex >= 0 && count > 1) {
-            let endIndex = startIndex + count;
+        if (listStartIndex >= 0 && listCount > 1) {
+            const endIndex = listStartIndex + listCount;
 
-            let userList = _.slice(state.userListOrder, startIndex, endIndex);
+            let userList = _.slice(state.userListOrder, listStartIndex, endIndex);
 
-            userList = _.map(userList, function (id) {
+            userList = _.map(userList, function iterator(id) {
                 return this.users[id];
             }, state);
 
             return userList;
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     getPage(page, count) {
@@ -201,38 +248,40 @@ class UserStore {
 
     set(user) {
         if (user != null) {
-            let clonedUser = _.cloneDeep(user);
+            const clonedUser = _.cloneDeep(user);
 
-            //let currentUserObject = this.users[user.id];
+            // let currentUserObject = this.users[user.id];
             //
-            //if (currentUserObject != null) {
-            //    user = _.merge({}, currentUserObject, user);
-            //}
-
-            this.users[clonedUser.id] = clonedUser; // TODO We might want to do a merge here? In case the API returns data differently
+            // if (currentUserObject != null) {
+            //     user = _.merge({}, currentUserObject, user);
+            // }
+            // TODO We might want to do a merge here? In case the API returns data differently
+            this.users[clonedUser.id] = clonedUser;
 
             return true; // User was successfully updated.
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     setList(userList, startIndex) {
         let i = startIndex;
 
         if (_.isArray(userList)) {
-            _.forEach(userList, function (user) {
-                let clonedUser = _.cloneDeep(user);
+            _.forEach(userList, user => {
+                const clonedUser = _.cloneDeep(user);
 
-                this.users[clonedUser.id] = clonedUser; // TODO We might want to do a merge here? In case the API returns data differently
+                // TODO We might want to do a merge here?
+                // In case the API returns data differently
+                this.users[clonedUser.id] = clonedUser;
                 this.userListOrder[i] = clonedUser.id;
                 ++i;
             }, this);
 
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     // TODO If we need to manage a separate sorted list
@@ -243,7 +292,9 @@ class UserStore {
     //         _.forEach(userList, function (user) {
     //             let clonedUser = _.cloneDeep(user);
     //
-    //             this.users[clonedUser.id] = clonedUser; // TODO We might want to do a merge here? In case the API returns data differently
+    //             // TODO We might want to do a merge here?
+    //             // TODO In case the API returns data differently
+    //             this.users[clonedUser.id] = clonedUser;
     //             this.userSortedListOrder[i] = clonedUser.id;
     //             ++i;
     //         }, this);

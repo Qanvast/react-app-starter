@@ -18,10 +18,9 @@ import cookieConfig from '../configs/cookie';
  React & Router
  =================================*/
 import React from 'react';
-import {render} from 'react-dom';
-import {renderToString} from 'react-dom/server';
-import {Router, match, RouterContext} from 'react-router';
-import {createHistory} from 'history';
+import { render } from 'react-dom';
+import { renderToString } from 'react-dom/server';
+import { Router, match, RouterContext, browserHistory } from 'react-router';
 
 /*=================================
  Google Analytics
@@ -74,10 +73,10 @@ function getDataForRoutes (renderProps, callback) {
     ], callback);
 }
 
-export default class AppRouter {
+class AppRouter {
     /**
      * Client side router initialization.
-     * @param data
+     * @param container
      */
     static init(container) {
         function onUpdate () {
@@ -98,7 +97,7 @@ export default class AppRouter {
 
         render(
             <Router
-                history={createHistory()}
+                history={browserHistory}
                 routes={routes}
                 onUpdate={onUpdate}
             />,
@@ -124,18 +123,7 @@ export default class AppRouter {
 
                         iso.add(htmlBody, data); // Add the data snapshot to the response
 
-                        // Add/Update cookie
-                        console.log(`PAGE REQ :: REQ WITH COOKIE\n====================\n${JSON.stringify(req.signedCookies, null, 4)}`);
-
-                        if (_.isEmpty(req.signedCookies) || _.isEmpty(req.signedCookies.requestCount)) {
-                            // Add cookie
-                            console.log(`PAGE REQ :: New session! Initializing cookie with request count 1.`);
-                            res.cookie('requestCount', 1, _.defaults({}, cookieConfig.defaultOptions));
-                        } else {
-                            // Update cookie
-                            console.log(`PAGE REQ :: Old cookie with request count ${req.signedCookies.requestCount}.`);
-                            res.cookie('requestCount', _.parseInt(req.signedCookies.requestCount, 10) + 1, _.defaults({}, cookieConfig.defaultOptions));
-                        }
+                        // session detail, like sessionId, csrfToken is stored in req.signedCookies object e.g. {sessionId: 'asdsadasd', csrfToken: 'asdsad'}
 
                         res.render('index', {
                             app: appConfig,
@@ -153,3 +141,5 @@ export default class AppRouter {
         });
     }
 }
+
+export default AppRouter;
