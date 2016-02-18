@@ -105,7 +105,7 @@ class Session {
         };
     }
 
-    setUserId(userid) {
+    updateUserId(userid) {
         this._state.userId = userid;
     }
 

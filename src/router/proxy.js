@@ -71,7 +71,7 @@ proxy.post(
                         data.tokens.refreshToken
                     );
                     if (data.user && data.user.id) {
-                        req.session.setUserId(data.user.id);
+                        req.session.updateUserId(data.user.id);
                     }
 
                     req.session.generateCsrfToken();
@@ -80,8 +80,7 @@ proxy.post(
                 }
             })
             .then(result => {
-                const data = result[0];
-                const session = result[1];
+                const [ data, session ] = result;
 
                 // NEVER INCLUDE access tokens in the cookie for security reasons.
                 res.cookie('sessionId', session.id, _.defaults({}, cookieConfig.defaultOptions));

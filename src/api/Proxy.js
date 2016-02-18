@@ -36,12 +36,12 @@ class Proxy extends Base {
                 const reqUrl = `${this.constants.BASE_URL}/${reqPath}`;
 
                 fetch(reqUrl, options)
-                    .then(resp => {
-                        if (resp.status >= 200 && resp.status < 300) {
-                            return resp.json();
+                    .then(res => {
+                        if (res.status >= 200 && res.status < 300) {
+                            return res.json();
                         }
 
-                        reject(e.throwServerError(resp.statusText || defaultServerErrorMessage));
+                        reject(e.throwServerError(res.statusText || defaultServerErrorMessage));
 
                         return false;
                     })
@@ -51,7 +51,7 @@ class Proxy extends Base {
                         }
                     })
                     .catch(error => {
-                        reject(e.throwServerError('Corrupted response.', error));
+                        reject(e.throwServerError('Corrupted resonse.', error));
                     });
             });
         }
@@ -85,12 +85,12 @@ class Proxy extends Base {
 
             return new Promise((resolve, reject) => {
                 fetch(this.constants.BASE_URL + '/oauth2/token/refresh', options)
-                    .then(resp => {
-                        if (resp.status >= 200 && resp.status < 300) {
-                            return resp.json();
+                    .then(res => {
+                        if (res.status >= 200 && res.status < 300) {
+                            return res.json();
                         }
 
-                        reject(e.throwServerError(resp.statusText || defaultServerErrorMessage));
+                        reject(e.throwServerError(res.statusText || defaultServerErrorMessage));
 
                         return false;
                     })
@@ -101,12 +101,12 @@ class Proxy extends Base {
                                 && _.has(data, 'tokens.refreshToken')) {
                                 resolve(data.tokens);
                             } else {
-                                reject(e.throwServerError('Corrupted response.'));
+                                reject(e.throwServerError('Corrupted resonse.'));
                             }
                         }
                     })
                     .catch(error => {
-                        reject(e.throwServerError('Corrupted response.', error));
+                        reject(e.throwServerError('Corrupted resonse.', error));
                     });
             });
         }
