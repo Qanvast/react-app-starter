@@ -23,7 +23,13 @@ module.exports = {
     },
     nodemon: {
         script: serverDest + "/app.js",
-        watch: [serverDest]
+        watch: [serverDest],
+        env: {
+            "PORT"                   : "8080",
+            "API_BASE_URL"           : "http://localhost:8080/api",
+            "PROXY_BASE_URL"         : "http://localhost:8080/proxy",
+            "CLIENT_SECRET"          : "TEST_SECRET"
+        }
     },
     assets: {
         src: [

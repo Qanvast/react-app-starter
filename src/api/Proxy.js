@@ -9,17 +9,15 @@ import e from 'qanvast-error';
 import Base from './Base';
 
 const methodsWithBody = ['POST', 'PUT', 'PATCH', 'DELETE'];
-const defaultServerErrorMessage = 'Unsuccessful HTTP response.';
 
 class Proxy extends Base {
     static forward(req) {
         if (__SERVER__) {
+            const reqPath = req.originalUrl.split('/').splice(2).join('/');
+            const reqUrl = `${this.constants.BASE_URL}/${reqPath}`;
+
             const options = {
-                method: req.method,
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json'
-                }
+                method: req.method
             };
 
             if (req.session != null && req.session.hasValidAccessToken) {
@@ -31,29 +29,7 @@ class Proxy extends Base {
                 options.body = JSON.stringify(req.body);
             }
 
-            return new Promise((resolve, reject) => {
-                const reqPath = req.originalUrl.split('/').splice(2).join('/');
-                const reqUrl = `${this.constants.BASE_URL}/${reqPath}`;
-
-                fetch(reqUrl, options)
-                    .then(res => {
-                        if (res.status >= 200 && res.status < 300) {
-                            return res.json();
-                        }
-
-                        reject(e.throwServerError(res.statusText || defaultServerErrorMessage));
-
-                        return false;
-                    })
-                    .then(data => {
-                        if (data !== false) {
-                            resolve(data);
-                        }
-                    })
-                    .catch(error => {
-                        reject(e.throwServerError('Corrupted resonse.', error));
-                    });
-            });
+            return this.generateRequest(reqUrl, options);
         }
 
         if (__CLIENT__) {
@@ -85,12 +61,12 @@ class Proxy extends Base {
 
             return new Promise((resolve, reject) => {
                 fetch(this.constants.BASE_URL + '/oauth2/token/refresh', options)
-                    .then(res => {
-                        if (res.status >= 200 && res.status < 300) {
-                            return res.json();
+                    .then(resp => {
+                        if (resp.status >= 200 && resp.status < 300) {
+                            return resp.json();
                         }
 
-                        reject(e.throwServerError(res.statusText || defaultServerErrorMessage));
+                        reject(e.throwServerError(resp.statusText || this.constants.DEFAULT_ERROR_MESSAGE));
 
                         return false;
                     })
@@ -101,12 +77,12 @@ class Proxy extends Base {
                                 && _.has(data, 'tokens.refreshToken')) {
                                 resolve(data.tokens);
                             } else {
-                                reject(e.throwServerError('Corrupted resonse.'));
+                                reject(e.throwServerError('Corrupted response.'));
                             }
                         }
                     })
                     .catch(error => {
-                        reject(e.throwServerError('Corrupted resonse.', error));
+                        reject(e.throwServerError('Corrupted response.', error));
                     });
             });
         }

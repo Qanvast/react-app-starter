@@ -8,6 +8,9 @@ export default {
     facebook: {
         appId: '1416271475272311'
     },
+    intercom: {
+        appId: 'lqriosyp'
+    },
     baseUrl: 'https://qanvast.com',
     metadata: {
         siteName: 'React App Starter - by Qanvast',
