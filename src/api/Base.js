@@ -6,7 +6,7 @@ import { Promise } from 'es6-promise';
 
 import e from 'qanvast-error';
 
-const BASE_URL = `${__SERVER__ ? process.env.API_BASE_URL : process.env.PROXY_BASE_URL}`;
+const BASE_URL = __API_BASE_URL__;
 const DEFAULT_ERROR_MESSAGE = 'Unsuccessful HTTP response.';
 
 class API {
@@ -80,15 +80,11 @@ API.constants = {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Credentials: 'include',
-            'X-Qanvast-API-Version': '4.1.0'
+            'X-Qanvast-API-Version': __TARGET_API_VERSION__
         }
     },
     DEFAULT_ERROR_MESSAGE
 };
-
-if (__CLIENT__) {
-    API.constants.DEFAULT_OPTIONS.headers['X-CSRF-Token'] = this.getCsrfToken();
-}
 
 if (__SERVER__) {
     // TODO Server side rendering will render without auth state.

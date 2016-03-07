@@ -1,6 +1,7 @@
 // Libraries
 import _ from 'lodash';
 import qs from 'qs';
+import e from 'qanvast-error';
 
 // import validator from 'validator';
 
@@ -13,17 +14,27 @@ class User extends Base {
             method: 'GET'
         };
 
+        if (__CLIENT__) {
+            options.headers = {
+                'X-CSRF-Token': this.getCsrfToken()
+            };
+        }
+
         const reqUrl = `${this.constants.BASE_URL}/user/${id}`;
 
-        return () => {
-            return this.generateRequest(reqUrl, options);
-        }
+        return () => this.generateRequest(reqUrl, options);
     }
 
     static getPage(page, perPageCount) {
         const options = {
             method: 'GET'
         };
+
+        if (__CLIENT__) {
+            options.headers = {
+                'X-CSRF-Token': this.getCsrfToken()
+            };
+        }
 
         let reqUrl = `${this.constants.BASE_URL}/users`;
 
@@ -36,18 +47,18 @@ class User extends Base {
             reqUrl += `?${queryString}`;
         }
 
-        return () => {
-            return this.generateRequest(reqUrl, options)
+        return () =>
+            this
+                .generateRequest(reqUrl, options)
                 .then((response) => {
                     if (response.page === page &&
                         response.perPageCount === perPageCount &&
                         response.data != null) {
                         return Promise.resolve(response.data);
-                    } else {
-                        return reject(e.throwServerError('Corrupted response.'));
                     }
+
+                    return Promise.reject(e.throwServerError('Corrupted response.'));
                 });
-        }
     }
 }
 

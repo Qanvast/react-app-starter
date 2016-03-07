@@ -25,9 +25,7 @@ module.exports = {
         script: serverDest + "/app.js",
         watch: [serverDest],
         env: {
-            "PORT"                   : "8080",
-            "API_BASE_URL"           : "http://localhost:8080/api",
-            "PROXY_BASE_URL"         : "http://localhost:8080/proxy",
+            "PORT"                   : "8000",
             "CLIENT_SECRET"          : "TEST_SECRET"
         }
     },
@@ -68,7 +66,9 @@ module.exports = {
                 new webpack.DefinePlugin({
                     __CLIENT__: true,
                     __SERVER__: false,
-                    __DEVELOPMENT__: false
+                    __DEVELOPMENT__: false,
+                    __TARGET_API_VERSION__: "4.1.0",
+                    __API_BASE_URL__: "http://localhost:8000/proxy"
                 })
             ]
         }, webpackConfig),
@@ -93,7 +93,9 @@ module.exports = {
                 new webpack.DefinePlugin({
                     __CLIENT__: false,
                     __SERVER__: true,
-                    __DEVELOPMENT__: false
+                    __DEVELOPMENT__: false,
+                    __TARGET_API_VERSION__: "4.1.0",
+                    __API_BASE_URL__: "http://localhost:8000/api"
                 })
             ]
         }, webpackConfig)
