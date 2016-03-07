@@ -26,6 +26,7 @@ module.exports = {
         watch: [serverDest],
         env: {
             "PORT"                   : "8000",
+            "API_BASE_URL"           : "http://localhost:8000/api",
             "CLIENT_SECRET"          : "TEST_SECRET"
         }
     },
@@ -66,9 +67,7 @@ module.exports = {
                 new webpack.DefinePlugin({
                     __CLIENT__: true,
                     __SERVER__: false,
-                    __DEVELOPMENT__: false,
-                    __TARGET_API_VERSION__: "4.1.0",
-                    __API_BASE_URL__: "http://localhost:8000/proxy"
+                    __DEVELOPMENT__: false
                 })
             ]
         }, webpackConfig),
@@ -93,9 +92,7 @@ module.exports = {
                 new webpack.DefinePlugin({
                     __CLIENT__: false,
                     __SERVER__: true,
-                    __DEVELOPMENT__: false,
-                    __TARGET_API_VERSION__: "4.1.0",
-                    __API_BASE_URL__: "http://localhost:8000/api"
+                    __DEVELOPMENT__: false
                 })
             ]
         }, webpackConfig)

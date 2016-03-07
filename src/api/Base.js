@@ -1,13 +1,13 @@
 // Libraries
 import _ from 'lodash';
 import cookie from 'cookie';
-import prefix from 'superagent-prefix';
 import { Promise } from 'es6-promise';
 
 import e from 'qanvast-error';
 
-const BASE_URL = __API_BASE_URL__;
-const DEFAULT_ERROR_MESSAGE = 'Unsuccessful HTTP response.';
+const baseUrl = `${__SERVER__ ? process.env.API_BASE_URL : 'http://localhost:8000/proxy'}`;
+const targetApiVersion = '4.1.0';
+const defaultErrorMessage = 'Unsuccessful HTTP response.';
 
 class API {
     constructor() {
@@ -54,7 +54,7 @@ class API {
                             return resp.json();
                         }
 
-                        reject(e.throwServerError(resp.statusText || DEFAULT_ERROR_MESSAGE));
+                        reject(e.throwServerError(resp.statusText || defaultErrorMessage));
 
                         return false;
                     })
@@ -72,18 +72,17 @@ class API {
 }
 
 API.constants = {
-    BASE_URL,
+    BASE_URL: baseUrl,
     TIMEOUT_MS: 500,
-    URL_PREFIX: prefix(BASE_URL),
     DEFAULT_OPTIONS: {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Credentials: 'include',
-            'X-Qanvast-API-Version': __TARGET_API_VERSION__
+            'X-Qanvast-API-Version': targetApiVersion
         }
     },
-    DEFAULT_ERROR_MESSAGE
+    DEFAULT_ERROR_MESSAGE: defaultErrorMessage
 };
 
 if (__SERVER__) {

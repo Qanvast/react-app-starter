@@ -3,7 +3,7 @@ module.exports = function (src, bowerSrc, nodeSrc) {
         output: {
             filename: "[name].js"
         },
-        debug: true,
+        debug: false,
         watch: false,
         module: {
             preLoaders: [
