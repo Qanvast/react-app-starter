@@ -1,6 +1,7 @@
 // Libraries
 import _ from 'lodash';
 import cookie from 'cookie';
+import fetch from 'isomorphic-fetch';
 import { Promise } from 'es6-promise';
 
 import e from 'qanvast-error';
