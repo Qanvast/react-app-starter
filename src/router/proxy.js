@@ -50,7 +50,7 @@ proxy.use((req, res, next) => {
                 next(error);
             });
     } else {
-        next(e.throwForbiddenError());
+        next(e.throwForbiddenError('Session information is missing.'));
     }
 });
 

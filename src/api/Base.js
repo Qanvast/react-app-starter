@@ -1,7 +1,6 @@
 // Libraries
 import _ from 'lodash';
 import cookie from 'cookie';
-import fetch from 'isomorphic-fetch';
 import { Promise } from 'es6-promise';
 
 import e from 'qanvast-error';
@@ -44,7 +43,7 @@ class API {
             thisOptions = {};
         }
 
-        _.defaults(thisOptions, this.constants.DEFAULT_OPTIONS);
+        _.defaults(thisOptions, API.constants.DEFAULT_OPTIONS);
 
 
         return new Promise(
@@ -79,9 +78,9 @@ API.constants = {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            Credentials: 'include',
             'X-Qanvast-API-Version': targetApiVersion
-        }
+        },
+        credentials: 'include'
     },
     DEFAULT_ERROR_MESSAGE: defaultErrorMessage
 };

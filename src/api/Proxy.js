@@ -1,6 +1,5 @@
 // Libraries
 import _ from 'lodash';
-import fetch from 'isomorphic-fetch';
 // import validator from 'validator';
 
 import e from 'qanvast-error';

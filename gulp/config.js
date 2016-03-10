@@ -68,6 +68,9 @@ module.exports = {
                     __CLIENT__: true,
                     __SERVER__: false,
                     __DEVELOPMENT__: false
+                }),
+                new webpack.ProvidePlugin({
+                    'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
                 })
             ]
         }, webpackConfig),
