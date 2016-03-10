@@ -24,51 +24,12 @@ class UserStore {
 
         this.bindAction(UserActions.getUser, this.onGetUser);
         this.bindAction(UserActions.getUsers, this.onGetUsers);
-        this.bindAction(UserActions.loginUser, this.onLoginUser);
 
         this.exportPublicMethods({
             get: this.get,
             getList: this.getList,
             getPage: this.getPage
         });
-    }
-
-    onLoginUser(payload) {
-        const {
-            email,
-            password,
-            getData,
-            onError,
-            onFinish
-            } = payload;
-
-        const successCallback = data => {
-            if (data.user != null) {
-                this.set(data.user);
-            }
-
-            if (onFinish != null && _.isFunction(onFinish)) {
-                onFinish();
-            }
-
-            this.emitChange();
-        };
-
-        const errorCallback = error => {
-            if (onError != null && _.isFunction(onError)) {
-                onError(error);
-            }
-
-            if (onFinish != null && _.isFunction(onFinish)) {
-                onFinish(error);
-            }
-        };
-
-        getData(email, password)
-            .then(successCallback)
-            .catch(errorCallback);
-
-        return false;
     }
 
     onGetUser(payload) {

@@ -51,7 +51,7 @@ export default (env) => {
         let error = null;
 
         if (originIsWhitelisted === false) {
-            error = e.throwForbiddenError();
+            error = e.throwForbiddenError('Invalid Origins');
         }
 
         callback(error, originIsWhitelisted);

@@ -16,6 +16,8 @@ import path from 'path';
 import favicon from 'serve-favicon';
 import logger from 'morgan';
 
+import fetch from 'isomorphic-fetch';
+
 /**
  * Configs
  */

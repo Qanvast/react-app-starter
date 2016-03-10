@@ -3,16 +3,19 @@ export default {
         appId: 'UA-xxxxxxxx-x'
     },
     addthis: {
-        id: 'ra-55485b266c561c10'
+        id: 'ra-554851680de6e9de'
     },
     facebook: {
-        appId: '425937027510514'
+        appId: '1416271475272311'
     },
-    baseUrl: 'http://react.stevetan.me',
+    intercom: {
+        appId: 'lqriosyp'
+    },
+    baseUrl: 'https://qanvast.com',
     metadata: {
-        siteName: 'React App Starter - by Steve Tan',
+        siteName: 'React App Starter - by Qanvast',
         type: 'website',
-        url: 'http://react.stevetan.me',
+        url: 'https://qanvast.com',
         title: 'React App Starter',
         description: 'This is a fully isomorphic React / Flux App starter.'
     }

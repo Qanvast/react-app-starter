@@ -23,7 +23,12 @@ module.exports = {
     },
     nodemon: {
         script: serverDest + "/app.js",
-        watch: [serverDest]
+        watch: [serverDest],
+        env: {
+            "PORT"                   : "8000",
+            "API_BASE_URL"           : "http://localhost:8000/api",
+            "CLIENT_SECRET"          : "TEST_SECRET"
+        }
     },
     assets: {
         src: [
@@ -63,6 +68,9 @@ module.exports = {
                     __CLIENT__: true,
                     __SERVER__: false,
                     __DEVELOPMENT__: false
+                }),
+                new webpack.ProvidePlugin({
+                    'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
                 })
             ]
         }, webpackConfig),

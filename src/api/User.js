@@ -1,127 +1,64 @@
 // Libraries
-import async from 'async';
-import http from 'superagent';
+import _ from 'lodash';
+import qs from 'qs';
+import e from 'qanvast-error';
+
 // import validator from 'validator';
 
 // Base API class
 import Base from './Base';
 
 class User extends Base {
-
-    static login(email, password) {
-        return () => {
-            const headers = {
-                Accept: 'application/json'
-            };
-            headers['Content-Type'] = 'application/json';
-            headers['x-csrf-token'] = this.getCsrfToken();
-
-            return new Promise((resolve, reject) => {
-                async.waterfall([
-                    callback => {
-                        http
-                            .post('/authentication/connect/local/')
-                            .use(this.constants.URL_PREFIX)
-                            .set(headers)
-                            .type('json')
-                            .send({ email, password })
-                            .withCredentials()
-                            .timeout(this.constants.TIMEOUT_MS)
-                            .end(callback);
-                    },
-
-                    (result, callback) => {
-                        callback(null, result.body);
-                    }
-                ], (error, data) => {
-                    if (!error) {
-                        resolve(data);
-                    } else {
-                        reject(error);
-                    }
-                });
-            });
-        };
-    }
-
     static get(id) {
-        return () => {
-            const headers = {};
-
-            headers[`x-csrf-token`] = this.getCsrfToken();
-
-            return new Promise((resolve, reject) => {
-                async.waterfall([
-                    callback => {
-                        http
-                            .get('/user/' + id)
-                            .set(headers)
-                            .withCredentials()
-                            .use(this.constants.URL_PREFIX)
-                            .timeout(this.constants.TIMEOUT_MS)
-                            .end(callback);
-                    },
-
-                    (result, callback) => {
-                        // TODO: Transform the data if necessary.
-                        // TODO: Otherwise, pass it back to the caller.
-                        callback(null, result.body);
-                    }
-                ], (error, data) => {
-                    if (!error) {
-                        resolve(data);
-                    } else {
-                        reject(error);
-                    }
-                });
-            });
+        const options = {
+            method: 'GET'
         };
+
+        if (__CLIENT__) {
+            options.headers = {
+                'X-CSRF-Token': this.getCsrfToken()
+            };
+        }
+
+        const reqUrl = `${this.constants.BASE_URL}/user/${id}`;
+
+        return () => this.generateRequest(reqUrl, options);
     }
 
     static getPage(page, perPageCount) {
-        return () => {
-            const headers = {};
-
-            headers['x-csrf-token'] = this.getCsrfToken();
-
-            return new Promise((resolve, reject) => {
-                async.waterfall([
-                    callback => {
-                        http
-                            .get('/users')
-                            .set(headers)
-                            .withCredentials()
-                            .query({
-                                page,
-                                per_page_count: perPageCount
-                            })
-                            .use(this.constants.URL_PREFIX)
-                            .timeout(this.constants.TIMEOUT_MS)
-                            .end(callback);
-                    },
-
-                    (result, callback) => {
-                        // TODO: Transform the data if necessary.
-                        // TODO: Otherwise, pass it back to the caller.
-                        const response = result.body;
-
-                        if (response.page === page &&
-                            response.perPageCount === perPageCount &&
-                            response.data != null) {
-                            callback(null, response.data);
-                        } else {
-                            callback(new Error('Invalid response!'));
-                        }
-                    }
-                ], (error, data) => {
-                    if (!error) {
-                        resolve(data);
-                    } else {
-                        reject(error);
-                    }
-                });
-            });
+        const options = {
+            method: 'GET'
         };
+
+        if (__CLIENT__) {
+            options.headers = {
+                'X-CSRF-Token': this.getCsrfToken()
+            };
+        }
+
+        let reqUrl = `${this.constants.BASE_URL}/users`;
+
+        const queryString = qs.stringify({
+            page,
+            per_page_count: perPageCount
+        });
+
+        if (!_.isEmpty(queryString)) {
+            reqUrl += `?${queryString}`;
+        }
+
+        return () =>
+            this
+                .generateRequest(reqUrl, options)
+                .then((response) => {
+                    if (response.page === page &&
+                        response.perPageCount === perPageCount &&
+                        response.data != null) {
+                        return Promise.resolve(response.data);
+                    }
+
+                    return Promise.reject(e.throwServerError('Corrupted response.'));
+                });
     }
 }
 
